@@ -155,6 +155,12 @@ move_tick_ms : U32 =
 move_hold_ticks : U32 =
   5
 
+player_start_hp : U32 =
+  100
+
+player_hull_cap : U32 =
+  120
+
 player_w : U32 =
   5
 
@@ -218,7 +224,7 @@ def starfox_css() -> String:
   ++ ".cabinet{display:grid;justify-self:center;justify-items:stretch;align-content:start;gap:10px;width:max-content;max-width:100%;}.screen-frame{width:max-content;max-width:100%;padding:10px;display:grid;gap:10px;}.frame-top{display:flex;align-items:stretch;gap:8px;}.mission-strip{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}.hud-chip{display:grid;gap:6px;padding:9px 10px;border:1px solid var(--border-soft);background:rgba(7,17,30,0.92);}.hud-chip span{color:var(--text-soft);text-transform:uppercase;letter-spacing:0.14em;font-size:0.62rem;}.hud-value{color:var(--text-main);font-family:'Lucida Console','Courier New',monospace;font-size:0.92rem;line-height:1.2;}.hud-value.accent{color:var(--accent);}.hud-value.warn{color:#ffe29a;}.hud-value.danger{color:#ffb49c;}.system-pill{width:52px;min-width:52px;border:1px solid var(--border-soft);background:rgba(7,17,30,0.92);display:grid;place-items:center;font-family:'Lucida Console','Courier New',monospace;font-size:0.66rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);}.shell.upgrade .system-pill{color:#ffe29a;}.shell.over .system-pill{color:#ffb49c;}"
   ++ ".health-panel{display:grid;gap:8px;}.health-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}.health-tag{color:var(--accent);text-transform:uppercase;letter-spacing:0.14em;font-size:0.68rem;font-family:'Lucida Console','Courier New',monospace;}.health-readout{color:#fff4cd;font-family:'Lucida Console','Courier New',monospace;font-size:0.9rem;}.health-track{height:18px;padding:2px;border:1px solid var(--border-soft);background:rgba(7,17,30,0.92);overflow:hidden;}.health-fill{height:100%;background:linear-gradient(90deg,#85f0cf 0%,#ffe29a 58%,#ff9464 100%);box-shadow:0 0 16px rgba(123,227,255,0.24);}"
   ++ ".screen-surface{position:relative;display:inline-flex;max-width:100%;overflow:hidden;border:1px solid rgba(255,255,255,0.06);background:linear-gradient(180deg,#05070d 0%,#07111e 100%);}.screen-surface::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(123,227,255,0.16),transparent 34%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent 28%);pointer-events:none;z-index:1;}.board_wrap{position:relative;z-index:2;display:inline-flex;padding:8px;border-radius:16px;background:rgba(4,8,14,0.92);box-shadow:inset 0 0 28px rgba(0,0,0,0.42);}.board{display:inline-flex;flex-direction:column;gap:1px;}.row{display:flex;gap:1px;}.cell{width:clamp(13px,1.15vw,14px);height:clamp(13px,1.15vw,14px);border-radius:3px;background:#08121a;}"
-  ++ ".cell.wall{background:linear-gradient(180deg,#32465b,#1a2733);}.cell.lane{background:linear-gradient(180deg,#0f1d29,#0a151d);}.cell.star{background:radial-gradient(circle,#b8eeff 0 22%,transparent 24%),#08121a;}.cell.nebula{background:linear-gradient(180deg,#11253a,#08121a);}.cell.player-wing{background:linear-gradient(180deg,#75ecff,#1b9eb3);}.cell.player-core{background:linear-gradient(180deg,#fff7c3,#4ff0d7 42%,#0b9b88);box-shadow:0 0 12px rgba(79,240,215,0.24);}.cell.player-cockpit{background:linear-gradient(180deg,#f6fbff,#89b6ff);}.cell.player-thruster{background:linear-gradient(180deg,#ffd67a,#ff7c3d);}.cell.enemy-a{background:linear-gradient(180deg,#ffd471,#ef7f41);box-shadow:0 0 12px rgba(239,127,65,0.24);}.cell.enemy-b{background:linear-gradient(180deg,#86f4ff,#2f9fd6);box-shadow:0 0 12px rgba(47,159,214,0.22);}.cell.boss-core{background:linear-gradient(180deg,#fff0a5,#ff9e3d 42%,#a63447);box-shadow:0 0 16px rgba(255,158,61,0.24);}.cell.boss-wing{background:linear-gradient(180deg,#b07dff,#5b6be0 44%,#26315d);}.cell.ring{background:radial-gradient(circle at 50% 50%,transparent 0 28%,#fff4ba 30% 46%,#ffcb68 52% 72%,transparent 74%),#08121a;}.cell.shot{background:linear-gradient(180deg,rgba(171,244,255,0.12),#8ce5ff 36%,#fcffff 60%,rgba(171,244,255,0.12));box-shadow:0 0 10px rgba(140,229,255,0.28);}.cell.enemy-shot{background:linear-gradient(180deg,#ffd67a,#ff7a36);}.cell.enemy-shot.boss{background:linear-gradient(180deg,#fff1b0,#ff9442 42%,#92213a);}.cell.gate{background:linear-gradient(180deg,#30436d,#213252);}.cell.gate-edge{background:linear-gradient(180deg,#ffd36a,#ff8d36);}.cell.shield{background:radial-gradient(circle,#dffbff 0 24%,#87ecff 28%,#167fa4 100%);}"
+  ++ ".cell.wall{background:linear-gradient(180deg,#32465b,#1a2733);}.cell.lane{background:linear-gradient(180deg,#0f1d29,#0a151d);}.cell.star{background:radial-gradient(circle,#b8eeff 0 22%,transparent 24%),#08121a;}.cell.nebula{background:linear-gradient(180deg,#11253a,#08121a);}.cell.player-wing{background:linear-gradient(180deg,#75ecff,#1b9eb3);}.cell.player-core{background:linear-gradient(180deg,#fff7c3,#4ff0d7 42%,#0b9b88);box-shadow:0 0 12px rgba(79,240,215,0.24);}.cell.player-cockpit{background:linear-gradient(180deg,#f6fbff,#89b6ff);}.cell.player-thruster{background:linear-gradient(180deg,#ffd67a,#ff7c3d);}.cell.enemy-a{background:linear-gradient(180deg,#ffd471,#ef7f41);box-shadow:0 0 12px rgba(239,127,65,0.24);}.cell.enemy-b{background:linear-gradient(180deg,#86f4ff,#2f9fd6);box-shadow:0 0 12px rgba(47,159,214,0.22);}.cell.boss-core{background:linear-gradient(180deg,#fff0a5,#ff9e3d 42%,#a63447);box-shadow:0 0 16px rgba(255,158,61,0.24);}.cell.boss-wing{background:linear-gradient(180deg,#b07dff,#5b6be0 44%,#26315d);}.cell.ring{background:radial-gradient(circle at 50% 50%,transparent 0 28%,#fff4ba 30% 46%,#ffcb68 52% 72%,transparent 74%),#08121a;}.cell.shot{background:radial-gradient(circle at 50% 50%,#fcffff 0 24%,#8ce5ff 28% 54%,rgba(140,229,255,0.2) 62%,transparent 70%),#08121a;border-radius:999px;box-shadow:0 0 10px rgba(140,229,255,0.32);}.cell.enemy-shot{background:radial-gradient(circle at 50% 50%,#fff3bf 0 24%,#ffb35a 30% 56%,rgba(255,122,54,0.24) 64%,transparent 72%),#08121a;border-radius:999px;box-shadow:0 0 10px rgba(255,148,74,0.3);}.cell.enemy-shot.boss{background:radial-gradient(circle at 50% 50%,#fff0c2 0 24%,#ff9442 30% 56%,rgba(146,33,58,0.34) 64%,transparent 72%),#08121a;border-radius:999px;box-shadow:0 0 12px rgba(255,108,72,0.34);}.cell.gate{background:linear-gradient(180deg,#30436d,#213252);}.cell.gate-edge{background:linear-gradient(180deg,#ffd36a,#ff8d36);}.cell.shield{background:radial-gradient(circle,#dffbff 0 24%,#87ecff 28%,#167fa4 100%);}"
   ++ ".scanlines{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,0.035) 0,rgba(255,255,255,0.035) 2px,transparent 2px,transparent 5px);mix-blend-mode:screen;opacity:0.3;pointer-events:none;z-index:3;}.screen_overlay{position:absolute;inset:0;padding:12px;display:grid;place-items:center;z-index:4;pointer-events:none;}.overlay_empty{display:none;}.overlay{max-width:min(100%,420px);padding:16px;border-radius:22px;background:rgba(7,17,30,0.95);border:1px solid rgba(230,190,89,0.32);box-shadow:0 22px 50px rgba(0,0,0,0.48);display:grid;gap:12px;pointer-events:auto;}.overlay_title{font-size:1.5rem;line-height:1;color:#fff6d4;font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;letter-spacing:0.05em;text-align:center;}.overlay_sub{font-size:0.82rem;line-height:1.55;color:#a6c0cb;text-align:center;}.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}.choice{border:1px solid var(--border-soft);padding:14px;background:rgba(7,17,30,0.92);color:var(--text-main);text-align:left;display:grid;gap:8px;cursor:pointer;}.choice_num{font-size:0.68rem;letter-spacing:0.16em;text-transform:uppercase;color:#ffe29a;}.choice_title{font-size:1rem;line-height:1;color:#fff6d4;font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;}.choice_copy{font-size:0.78rem;line-height:1.5;color:#abc3cf;}"
   ++ ".cabinet-footer{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;}.toast{min-height:18px;font-size:0.72rem;line-height:1.5;color:#ffe29a;letter-spacing:0.08em;text-transform:uppercase;}.legend{font-size:0.72rem;line-height:1.5;color:var(--text-soft);text-align:left;}"
   ++ ".control-deck{width:100%;max-width:100%;padding:8px 10px;display:grid;gap:8px;}.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}.btn{min-width:84px;padding:10px 12px;border:1px solid var(--border-soft);background:rgba(7,17,30,0.92);color:var(--text-main);font-family:'Lucida Console','Courier New',monospace;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;}.left,.right{color:#8ddfff;border-color:rgba(123,227,255,0.4);}.up,.down{color:#a5f4dd;border-color:rgba(133,240,207,0.36);}.fire{color:#ffe29a;border-color:rgba(255,214,124,0.52);}.reset{color:#ffba9a;border-color:rgba(255,148,100,0.42);}.hint{font-size:0.74rem;line-height:1.45;color:var(--text-soft);text-align:center;}"
@@ -538,7 +544,7 @@ def game_reset(best: U32) -> Game:
   mk_game(
     0, 0, 7, 0, 1, 0, best, 1, 1, 0, xp_need(1), 0, 8, 0, 0,
     mission_ready(), 0, 999,
-    player_start_x(), player_start_y(), 8, 8, 1, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0,
+    player_start_x(), player_start_y(), player_start_hp, player_start_hp, 1, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0,
     12, 34, 128, boss_spawn_ticks,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     empty_player_shots(), empty_enemy_shots(), empty_enemies(), empty_rings(), gate_none(), boss_none()
@@ -1895,7 +1901,7 @@ def upgrade_available_stats(
 ) -> U32:
   match id:
     case 0:
-      player_max_hp < 22
+      player_max_hp < player_hull_cap
     case 1:
       player_damage < 8
     case 2:
@@ -2521,11 +2527,7 @@ def enemy_shot_hits_player(shot_: EnemyShot, px: U32, py: U32) -> U32:
 def enemy_shot_damage(shot_: EnemyShot) -> U32:
   match shot_:
     case eshot{x, y, dir, boss}:
-      match boss:
-        case 0:
-          1
-        case _:
-          2
+      4
 
 def enemy_shot_penalty(shot_: EnemyShot) -> U32:
   match shot_:

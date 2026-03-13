@@ -13,7 +13,7 @@ bend app_starfox_2d.bend --no-strict
 ## Compile To HTML
 
 ```sh
-bend app_starfox_2d.bend --no-strict --to-web > starfox_2d.html
+bend starfox-2d.bend --no-strict --to-web > starfox-2d.html
 ```
 
 `--no-strict` is currently required because the original game uses many
