@@ -7,7 +7,7 @@ prelude.
 ## Run
 
 ```sh
-bend app_starfox_2d.bend --no-strict
+bend starfox_2d.bend
 ```
 
 ## Compile To HTML
