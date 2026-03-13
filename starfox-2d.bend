@@ -2977,18 +2977,19 @@ def remember_move_v(evt: StarfoxEvent, move_v: U32) -> U32:
 def remember_move_h_ttl(evt: StarfoxEvent, move_h_ttl: U32) -> U32:
   match evt:
     case move_left{}:
-      move_hold_ticks
+      # Without key-up events, queuing held movement makes one tap drift.
+      0
     case move_right{}:
-      move_hold_ticks
+      0
     case _:
       move_h_ttl
 
 def remember_move_v_ttl(evt: StarfoxEvent, move_v_ttl: U32) -> U32:
   match evt:
     case move_up{}:
-      move_hold_ticks
+      0
     case move_down{}:
-      move_hold_ticks
+      0
     case _:
       move_v_ttl
 
