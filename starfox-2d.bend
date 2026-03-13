@@ -655,63 +655,90 @@ def key_is_3(key: U32) -> U32:
   (key === 51) | (key === 99)
 
 def starfox_key_evt(key: U32) -> StarfoxEvent:
-  match key_is_1(key):
+  starfox_key_evt_flag(key, key_is_1(key))
+
+def starfox_key_evt_flag(key: U32, is_1: U32) -> StarfoxEvent:
+  match is_1:
     case 0:
       starfox_key_evt_2(key)
     case _:
       evt_choice_1()
 
 def starfox_key_evt_2(key: U32) -> StarfoxEvent:
-  match key_is_2(key):
+  starfox_key_evt_2_flag(key, key_is_2(key))
+
+def starfox_key_evt_2_flag(key: U32, is_2: U32) -> StarfoxEvent:
+  match is_2:
     case 0:
       starfox_key_evt_3(key)
     case _:
       evt_choice_2()
 
 def starfox_key_evt_3(key: U32) -> StarfoxEvent:
-  match key_is_3(key):
+  starfox_key_evt_3_flag(key, key_is_3(key))
+
+def starfox_key_evt_3_flag(key: U32, is_3: U32) -> StarfoxEvent:
+  match is_3:
     case 0:
       starfox_key_evt_left(key)
     case _:
       evt_choice_3()
 
 def starfox_key_evt_left(key: U32) -> StarfoxEvent:
-  match key_is_left(key):
+  starfox_key_evt_left_flag(key, key_is_left(key))
+
+def starfox_key_evt_left_flag(key: U32, is_left: U32) -> StarfoxEvent:
+  match is_left:
     case 0:
       starfox_key_evt_up(key)
     case _:
       evt_move_left()
 
 def starfox_key_evt_up(key: U32) -> StarfoxEvent:
-  match key_is_up(key):
+  starfox_key_evt_up_flag(key, key_is_up(key))
+
+def starfox_key_evt_up_flag(key: U32, is_up: U32) -> StarfoxEvent:
+  match is_up:
     case 0:
       starfox_key_evt_right(key)
     case _:
       evt_move_up()
 
 def starfox_key_evt_right(key: U32) -> StarfoxEvent:
-  match key_is_right(key):
+  starfox_key_evt_right_flag(key, key_is_right(key))
+
+def starfox_key_evt_right_flag(key: U32, is_right: U32) -> StarfoxEvent:
+  match is_right:
     case 0:
       starfox_key_evt_down(key)
     case _:
       evt_move_right()
 
 def starfox_key_evt_down(key: U32) -> StarfoxEvent:
-  match key_is_down(key):
+  starfox_key_evt_down_flag(key, key_is_down(key))
+
+def starfox_key_evt_down_flag(key: U32, is_down: U32) -> StarfoxEvent:
+  match is_down:
     case 0:
       starfox_key_evt_fire(key)
     case _:
       evt_move_down()
 
 def starfox_key_evt_fire(key: U32) -> StarfoxEvent:
-  match key_is_fire(key):
+  starfox_key_evt_fire_flag(key, key_is_fire(key))
+
+def starfox_key_evt_fire_flag(key: U32, is_fire: U32) -> StarfoxEvent:
+  match is_fire:
     case 0:
       starfox_key_evt_restart(key)
     case _:
       evt_fire()
 
 def starfox_key_evt_restart(key: U32) -> StarfoxEvent:
-  match key_is_restart(key):
+  starfox_key_evt_restart_flag(key, key_is_restart(key))
+
+def starfox_key_evt_restart_flag(key: U32, is_restart: U32) -> StarfoxEvent:
+  match is_restart:
     case 0:
       evt_ignore()
     case _:
@@ -721,32 +748,32 @@ def starfox_key_evt_restart(key: U32) -> StarfoxEvent:
 # --------
 
 def step_left_n(x: U32, n: U32) -> U32:
-  match n === 0:
+  match n:
     case 0:
-      step_left_n(u32_sub_sat(x, 1), n - 1)
-    case _:
       x
+    case _:
+      step_left_n(u32_sub_sat(x, 1), n - 1)
 
 def step_right_n(x: U32, n: U32) -> U32:
-  match n === 0:
+  match n:
     case 0:
-      step_right_n(x + 1, n - 1)
-    case _:
       x
+    case _:
+      step_right_n(x + 1, n - 1)
 
 def step_up_n(y: U32, n: U32) -> U32:
-  match n === 0:
+  match n:
     case 0:
-      step_up_n(u32_sub_sat(y, 1), n - 1)
-    case _:
       y
+    case _:
+      step_up_n(u32_sub_sat(y, 1), n - 1)
 
 def step_down_n(y: U32, n: U32) -> U32:
-  match n === 0:
+  match n:
     case 0:
-      step_down_n(y + 1, n - 1)
-    case _:
       y
+    case _:
+      step_down_n(y + 1, n - 1)
 
 def move_player_left(x: U32, speed: U32) -> U32:
   clamp(step_left_n(x, speed), player_min_x, player_max_x)
@@ -850,11 +877,14 @@ def gate_has_cell(gate_: Gate, x: U32, y: U32) -> U32:
       gap_left = gx;
       gap_right = gx + gap - 1;
       in_row = (y === top) | (y === bot);
-      match in_row:
-        case 0:
-          0
-        case _:
-          (x < gap_left) | (gap_right < x)
+      gate_has_cell_row(in_row, x, gap_left, gap_right)
+
+def gate_has_cell_row(in_row: U32, x: U32, gap_left: U32, gap_right: U32) -> U32:
+  match in_row:
+    case 0:
+      0
+    case _:
+      (x < gap_left) | (gap_right < x)
 
 def gate_edge_cell(gate_: Gate, x: U32, y: U32) -> U32:
   match gate_:
@@ -866,11 +896,14 @@ def gate_edge_cell(gate_: Gate, x: U32, y: U32) -> U32:
       gap_left = gx;
       gap_right = gx + gap - 1;
       in_row = (y === top) | (y === bot);
-      match in_row:
-        case 0:
-          0
-        case _:
-          (x === u32_sub_sat(gap_left, 1)) | (x === (gap_right + 1))
+      gate_edge_cell_row(in_row, x, gap_left, gap_right)
+
+def gate_edge_cell_row(in_row: U32, x: U32, gap_left: U32, gap_right: U32) -> U32:
+  match in_row:
+    case 0:
+      0
+    case _:
+      (x === u32_sub_sat(gap_left, 1)) | (x === (gap_right + 1))
 
 def gate_hits_player(gate_: Gate, px: U32, py: U32) -> U32:
   match gate_:
@@ -884,21 +917,36 @@ def gate_hits_player(gate_: Gate, px: U32, py: U32) -> U32:
       gap_left = gx;
       gap_right = gx + gap - 1;
       overlap_y = (py <= gate_bottom) & (gate_top <= (py + (player_h - 1)));
-      match overlap_y:
-        case 0:
-          0
-        case _:
-          (player_left < gap_left) | (gap_right < player_right)
+      gate_hits_player_overlap(overlap_y, player_left, player_right, gap_left, gap_right)
+
+def gate_hits_player_overlap(
+  overlap_y: U32,
+  player_left: U32,
+  player_right: U32,
+  gap_left: U32,
+  gap_right: U32
+) -> U32:
+  match overlap_y:
+    case 0:
+      0
+    case _:
+      (player_left < gap_left) | (gap_right < player_right)
 
 def gate_block_player_x(gate_: Gate, old_x: U32, player_y: U32, next_x: U32) -> U32:
-  match gate_hits_player(gate_, next_x, player_y):
+  gate_block_player_x_flag(gate_hits_player(gate_, next_x, player_y), old_x, next_x)
+
+def gate_block_player_x_flag(hit_gate: U32, old_x: U32, next_x: U32) -> U32:
+  match hit_gate:
     case 0:
       next_x
     case _:
       old_x
 
 def gate_block_player_y(gate_: Gate, player_x: U32, old_y: U32, next_y: U32) -> U32:
-  match gate_hits_player(gate_, player_x, next_y):
+  gate_block_player_y_flag(gate_hits_player(gate_, player_x, next_y), old_y, next_y)
+
+def gate_block_player_y_flag(hit_gate: U32, old_y: U32, next_y: U32) -> U32:
+  match hit_gate:
     case 0:
       next_y
     case _:
@@ -907,7 +955,14 @@ def gate_block_player_y(gate_: Gate, player_x: U32, old_y: U32, next_y: U32) -> 
 def player_has_cell(player_x: U32, player_y: U32, x: U32, y: U32) -> U32:
   row = u32_sub_sat(y, player_y);
   col = u32_sub_sat(x, player_x);
-  match (player_y <= y) & (y <= (player_y + 3)) & (player_x <= x) & (x <= (player_x + 4)):
+  player_has_cell_flag(
+    (player_y <= y) & (y <= (player_y + 3)) & (player_x <= x) & (x <= (player_x + 4)),
+    row,
+    col
+  )
+
+def player_has_cell_flag(in_bounds: U32, row: U32, col: U32) -> U32:
+  match in_bounds:
     case 0:
       0
     case _:
@@ -1031,7 +1086,10 @@ def rings_len(xs: List(Ring)) -> U32:
       1 + rings_len(rest)
 
 def enemy_spawn_dir(seed: U32, id: U32) -> DirX:
-  match rng_mod(seed + (id * 5), 2) === 0:
+  enemy_spawn_dir_flag(rng_mod(seed + (id * 5), 2), id)
+
+def enemy_spawn_dir_flag(seed_mod: U32, id: U32) -> DirX:
+  match seed_mod:
     case 0:
       dir_right()
     case _:
@@ -1164,21 +1222,40 @@ def pack_shots(shots: List(PlayerShot), seed: U32) -> ShotPack:
   shot_pack{shots, seed}
 
 def spread_shots(player_x: U32, player_y: U32, damage: U32, spread: U32) -> List(PlayerShot):
-  center = shot_from_spawn(player_x + 2, player_y, dir_stay(), damage);
-  match spread === 0:
+  spread_shots_center(shot_from_spawn(player_x + 2, player_y, dir_stay(), damage), player_x, player_y, damage, spread)
+
+def spread_shots_center(center: PlayerShot, player_x: U32, player_y: U32, damage: U32, spread: U32) -> List(PlayerShot):
+  match spread:
     case 0:
-      spread_shots_one(center, player_x, player_y, damage, spread)
-    case _:
       center<>empty_player_shots()
+    case _:
+      spread_shots_one(center, player_x, player_y, damage, spread)
 
 def spread_shots_one(center: PlayerShot, player_x: U32, player_y: U32, damage: U32, spread: U32) -> List(PlayerShot):
-  left1 = shot_from_spawn(player_x + 1, player_y, dir_left(), damage);
-  right1 = shot_from_spawn(player_x + 3, player_y, dir_right(), damage);
-  match spread === 1:
-    case 0:
-      spread_shots_two(center, left1, right1, player_x, player_y, damage)
-    case _:
+  spread_shots_one_lr(
+    center,
+    shot_from_spawn(player_x + 1, player_y, dir_left(), damage),
+    shot_from_spawn(player_x + 3, player_y, dir_right(), damage),
+    player_x,
+    player_y,
+    damage,
+    spread
+  )
+
+def spread_shots_one_lr(
+  center: PlayerShot,
+  left1: PlayerShot,
+  right1: PlayerShot,
+  player_x: U32,
+  player_y: U32,
+  damage: U32,
+  spread: U32
+) -> List(PlayerShot):
+  match spread:
+    case 1:
       center<>left1<>right1<>empty_player_shots()
+    case _:
+      spread_shots_two(center, left1, right1, player_x, player_y, damage)
 
 def spread_shots_two(center: PlayerShot, left1: PlayerShot, right1: PlayerShot, player_x: U32, player_y: U32, damage: U32) -> List(PlayerShot):
   left2 = shot_from_spawn(player_x + 0, player_y + 1, dir_left(), damage);
@@ -1204,7 +1281,44 @@ def fire_now(game_: Game) -> Game:
       kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
       shots, enemy_shots, enemies, rings, gate, boss
     }:
-      got = (game{
+      fire_now_cd(
+        fire_cd,
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+
+def fire_now_cd(
+  fire_cd: U32,
+  mode: U32, reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32, toast_kind: U32, toast_value: U32, toast_ttl: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32, invuln: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
+) -> Game:
+  match fire_cd:
+    case 0:
+      volley = spread_shots(player_x, player_y, player_damage, spread);
+      mk_game(
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_rate, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        merge_shots(volley, shots), enemy_shots, enemies, rings, gate, boss
+      )
+    case _:
+      mk_game(
         mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
         pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
         player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
@@ -1213,22 +1327,7 @@ def fire_now(game_: Game) -> Game:
         enemy_timer, ring_timer, gate_timer, boss_timer,
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
-      } :: Game);
-      match fire_cd === 0:
-        case 0:
-          got
-        case _:
-          volley = spread_shots(player_x, player_y, player_damage, spread);
-          mk_game(
-            mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
-            pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
-            player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
-            move_h, move_v, move_h_ttl, move_v_ttl,
-            fire_rate, fire_rate, bullet_step, spread, pierce, shield, invuln,
-            enemy_timer, ring_timer, gate_timer, boss_timer,
-            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-            merge_shots(volley, shots), enemy_shots, enemies, rings, gate, boss
-          )
+      )
 
 def enemy_bullet(x: U32, y: U32, dir: DirX, boss: U32) -> EnemyShot:
   eshot{x, y, dir, boss}
@@ -1241,15 +1340,21 @@ def enemy_shots_merge(front: List(EnemyShot), back: List(EnemyShot)) -> List(Ene
       enemy_shot_cons(x, enemy_shots_merge(rest, back))
 
 def enemy_target_dir(enemy_x: U32, player_x: U32) -> DirX:
-  match (enemy_x + 1) < player_x:
+  enemy_target_dir_right((enemy_x + 1) < player_x, enemy_x, player_x)
+
+def enemy_target_dir_right(player_on_right: U32, enemy_x: U32, player_x: U32) -> DirX:
+  match player_on_right:
     case 0:
-      match player_x < enemy_x:
-        case 0:
-          dir_left()
-        case _:
-          dir_stay()
+      enemy_target_dir_left(player_x < enemy_x)
     case _:
       dir_right()
+
+def enemy_target_dir_left(player_on_left: U32) -> DirX:
+  match player_on_left:
+    case 0:
+      dir_stay()
+    case _:
+      dir_left()
 
 def enemy_fire_shots(enemy_: Enemy, player_x: U32) -> List(EnemyShot):
   match enemy_:
@@ -1290,22 +1395,28 @@ def count_damage_enemy(enemy_: Enemy, shots: List(PlayerShot)) -> U32:
     case []:
       0
     case shot_<>rest:
-      match shot_hits_enemy(shot_, enemy_):
-        case 0:
-          count_damage_enemy(enemy_, rest)
-        case _:
-          player_shot_damage(shot_) + count_damage_enemy(enemy_, rest)
+      count_damage_enemy_hit(shot_hits_enemy(shot_, enemy_), enemy_, shot_, rest)
+
+def count_damage_enemy_hit(hit_enemy: U32, enemy_: Enemy, shot_: PlayerShot, rest: List(PlayerShot)) -> U32:
+  match hit_enemy:
+    case 0:
+      count_damage_enemy(enemy_, rest)
+    case _:
+      player_shot_damage(shot_) + count_damage_enemy(enemy_, rest)
 
 def count_damage_boss(boss_: Boss, shots: List(PlayerShot)) -> U32:
   match shots:
     case []:
       0
     case shot_<>rest:
-      match shot_hits_boss(shot_, boss_):
-        case 0:
-          count_damage_boss(boss_, rest)
-        case _:
-          player_shot_damage(shot_) + count_damage_boss(boss_, rest)
+      count_damage_boss_hit(shot_hits_boss(shot_, boss_), boss_, shot_, rest)
+
+def count_damage_boss_hit(hit_boss: U32, boss_: Boss, shot_: PlayerShot, rest: List(PlayerShot)) -> U32:
+  match hit_boss:
+    case 0:
+      count_damage_boss(boss_, rest)
+    case _:
+      player_shot_damage(shot_) + count_damage_boss(boss_, rest)
 
 def boss_apply_hits(boss_: Boss, damage: U32) -> Boss:
   match boss_:
@@ -1325,33 +1436,42 @@ def shot_hits_any_enemy(shot_: PlayerShot, enemies: List(Enemy)) -> U32:
     case []:
       0
     case enemy_<>rest:
-      match shot_hits_enemy(shot_, enemy_):
-        case 0:
-          shot_hits_any_enemy(shot_, rest)
-        case _:
-          1
+      shot_hits_any_enemy_hit(shot_hits_enemy(shot_, enemy_), shot_, rest)
+
+def shot_hits_any_enemy_hit(hit_enemy: U32, shot_: PlayerShot, rest: List(Enemy)) -> U32:
+  match hit_enemy:
+    case 0:
+      shot_hits_any_enemy(shot_, rest)
+    case _:
+      1
 
 def enemy_kill_count(enemies: List(Enemy), shots: List(PlayerShot)) -> U32:
   match enemies:
     case []:
       0
     case enemy_<>rest:
-      match enemy_dead_after(enemy_, shots):
-        case 0:
-          enemy_kill_count(rest, shots)
-        case _:
-          1 + enemy_kill_count(rest, shots)
+      enemy_kill_count_dead(enemy_dead_after(enemy_, shots), rest, shots)
+
+def enemy_kill_count_dead(dead_after: U32, rest: List(Enemy), shots: List(PlayerShot)) -> U32:
+  match dead_after:
+    case 0:
+      enemy_kill_count(rest, shots)
+    case _:
+      1 + enemy_kill_count(rest, shots)
 
 def enemy_survivors(enemies: List(Enemy), shots: List(PlayerShot)) -> List(Enemy):
   match enemies:
     case []:
       empty_enemies()
     case enemy_<>rest:
-      match enemy_dead_after(enemy_, shots):
-        case 0:
-          enemy_keep(enemy_, shots, enemy_survivors(rest, shots))
-        case _:
-          enemy_survivors(rest, shots)
+      enemy_survivors_dead(enemy_dead_after(enemy_, shots), enemy_, rest, shots)
+
+def enemy_survivors_dead(dead_after: U32, enemy_: Enemy, rest: List(Enemy), shots: List(PlayerShot)) -> List(Enemy):
+  match dead_after:
+    case 0:
+      enemy_keep(enemy_, shots, enemy_survivors(rest, shots))
+    case _:
+      enemy_survivors(rest, shots)
 
 def enemy_keep(enemy_: Enemy, shots: List(PlayerShot), rest: List(Enemy)) -> List(Enemy):
   match enemy_:
@@ -1364,11 +1484,21 @@ def consume_player_shots(shots: List(PlayerShot), enemies: List(Enemy), boss_: B
     case []:
       empty_player_shots()
     case shot_<>rest:
-      match shot_consumed(shot_, enemies, boss_, pierce):
-        case 0:
-          shot_cons(shot_, consume_player_shots(rest, enemies, boss_, pierce))
-        case _:
-          consume_player_shots(rest, enemies, boss_, pierce)
+      consume_player_shots_hit(shot_consumed(shot_, enemies, boss_, pierce), shot_, rest, enemies, boss_, pierce)
+
+def consume_player_shots_hit(
+  consumed: U32,
+  shot_: PlayerShot,
+  rest: List(PlayerShot),
+  enemies: List(Enemy),
+  boss_: Boss,
+  pierce: U32
+) -> List(PlayerShot):
+  match consumed:
+    case 0:
+      shot_cons(shot_, consume_player_shots(rest, enemies, boss_, pierce))
+    case _:
+      consume_player_shots(rest, enemies, boss_, pierce)
 
 def shot_consumed(shot_: PlayerShot, enemies: List(Enemy), boss_: Boss, pierce: U32) -> U32:
   shot_hits_boss(shot_, boss_) | shot_hits_any_enemy(shot_, enemies)
@@ -1380,11 +1510,11 @@ def shot_hits_any(shot_: PlayerShot, enemies: List(Enemy), boss_: Boss) -> U32:
 # -------------------
 
 def move_player_shot_n(shot_: PlayerShot, step: U32) -> PlayerShot:
-  match step === 0:
+  match step:
     case 0:
-      move_player_shot_n(move_player_shot_once(shot_), step - 1)
-    case _:
       shot_
+    case _:
+      move_player_shot_n(move_player_shot_once(shot_), step - 1)
 
 def move_player_shot_once(shot_: PlayerShot) -> PlayerShot:
   match shot_:
@@ -1397,11 +1527,14 @@ def shots_step(shots: List(PlayerShot), step: U32) -> List(PlayerShot):
       empty_player_shots()
     case shot_<>rest:
       moved = move_player_shot_n(shot_, step);
-      match player_shot_alive(moved):
-        case 0:
-          shot_cons(moved, shots_step(rest, step))
-        case _:
-          shots_step(rest, step)
+      shots_step_alive(player_shot_alive(moved), moved, rest, step)
+
+def shots_step_alive(alive_flag: U32, moved: PlayerShot, rest: List(PlayerShot), step: U32) -> List(PlayerShot):
+  match alive_flag:
+    case 0:
+      shot_cons(moved, shots_step(rest, step))
+    case _:
+      shots_step(rest, step)
 
 def player_shot_alive(shot_: PlayerShot) -> U32:
   match shot_:
@@ -1414,11 +1547,14 @@ def enemy_shot_step(shots: List(EnemyShot)) -> List(EnemyShot):
       empty_enemy_shots()
     case shot_<>rest:
       moved = move_enemy_shot_once(shot_);
-      match enemy_shot_dead(moved):
-        case 0:
-          enemy_shot_cons(moved, enemy_shot_step(rest))
-        case _:
-          enemy_shot_step(rest)
+      enemy_shot_step_dead(enemy_shot_dead(moved), moved, rest)
+
+def enemy_shot_step_dead(dead_flag: U32, moved: EnemyShot, rest: List(EnemyShot)) -> List(EnemyShot):
+  match dead_flag:
+    case 0:
+      enemy_shot_cons(moved, enemy_shot_step(rest))
+    case _:
+      enemy_shot_step(rest)
 
 def move_enemy_shot_once(shot_: EnemyShot) -> EnemyShot:
   match shot_:
@@ -1489,33 +1625,42 @@ def collect_enemy_fires(enemies: List(Enemy), player_x: U32) -> List(EnemyShot):
       empty_enemy_shots()
     case enemy_<>rest:
       pack = collect_enemy_fires(rest, player_x);
-      match enemy_fires(enemy_):
-        case 0:
-          pack
-        case _:
-          enemy_shots_merge(enemy_fire_shots(enemy_, player_x), pack)
+      collect_enemy_fires_flag(enemy_fires(enemy_), enemy_, player_x, pack)
+
+def collect_enemy_fires_flag(fires_now: U32, enemy_: Enemy, player_x: U32, pack: List(EnemyShot)) -> List(EnemyShot):
+  match fires_now:
+    case 0:
+      pack
+    case _:
+      enemy_shots_merge(enemy_fire_shots(enemy_, player_x), pack)
 
 def enemies_refresh_fire(enemies: List(Enemy)) -> List(Enemy):
   match enemies:
     case []:
       empty_enemies()
     case enemy_<>rest:
-      match enemy_fires(enemy_):
-        case 0:
-          enemy_cons(enemy_, enemies_refresh_fire(rest))
-        case _:
-          enemy_cons(enemy_reset_fire(enemy_), enemies_refresh_fire(rest))
+      enemies_refresh_fire_flag(enemy_fires(enemy_), enemy_, rest)
+
+def enemies_refresh_fire_flag(fires_now: U32, enemy_: Enemy, rest: List(Enemy)) -> List(Enemy):
+  match fires_now:
+    case 0:
+      enemy_cons(enemy_, enemies_refresh_fire(rest))
+    case _:
+      enemy_cons(enemy_reset_fire(enemy_), enemies_refresh_fire(rest))
 
 def enemies_remove_escaped(enemies: List(Enemy)) -> List(Enemy):
   match enemies:
     case []:
       empty_enemies()
     case enemy_<>rest:
-      match enemy_escaped(enemy_):
-        case 0:
-          enemy_cons(enemy_, enemies_remove_escaped(rest))
-        case _:
-          enemies_remove_escaped(rest)
+      enemies_remove_escaped_flag(enemy_escaped(enemy_), enemy_, rest)
+
+def enemies_remove_escaped_flag(escaped: U32, enemy_: Enemy, rest: List(Enemy)) -> List(Enemy):
+  match escaped:
+    case 0:
+      enemy_cons(enemy_, enemies_remove_escaped(rest))
+    case _:
+      enemies_remove_escaped(rest)
 
 def enemy_escaped(enemy_: Enemy) -> U32:
   enemy_y(enemy_) >= (board_h - 1)
@@ -1525,11 +1670,14 @@ def enemies_escaped_count(enemies: List(Enemy)) -> U32:
     case []:
       0
     case enemy_<>rest:
-      match enemy_escaped(enemy_):
-        case 0:
-          enemies_escaped_count(rest)
-        case _:
-          1 + enemies_escaped_count(rest)
+      enemies_escaped_count_flag(enemy_escaped(enemy_), rest)
+
+def enemies_escaped_count_flag(escaped: U32, rest: List(Enemy)) -> U32:
+  match escaped:
+    case 0:
+      enemies_escaped_count(rest)
+    case _:
+      1 + enemies_escaped_count(rest)
 
 def enemy_hits_player(enemy_: Enemy, px: U32, py: U32) -> U32:
   match enemy_:
@@ -1541,22 +1689,28 @@ def enemies_hit_player(enemies: List(Enemy), px: U32, py: U32) -> U32:
     case []:
       0
     case enemy_<>rest:
-      match enemy_hits_player(enemy_, px, py):
-        case 0:
-          enemies_hit_player(rest, px, py)
-        case _:
-          1
+      enemies_hit_player_flag(enemy_hits_player(enemy_, px, py), rest, px, py)
+
+def enemies_hit_player_flag(hit_player: U32, rest: List(Enemy), px: U32, py: U32) -> U32:
+  match hit_player:
+    case 0:
+      enemies_hit_player(rest, px, py)
+    case _:
+      1
 
 def enemies_remove_colliders(enemies: List(Enemy), px: U32, py: U32) -> List(Enemy):
   match enemies:
     case []:
       empty_enemies()
     case enemy_<>rest:
-      match enemy_hits_player(enemy_, px, py):
-        case 0:
-          enemy_cons(enemy_, enemies_remove_colliders(rest, px, py))
-        case _:
-          enemies_remove_colliders(rest, px, py)
+      enemies_remove_colliders_flag(enemy_hits_player(enemy_, px, py), enemy_, rest, px, py)
+
+def enemies_remove_colliders_flag(hit_player: U32, enemy_: Enemy, rest: List(Enemy), px: U32, py: U32) -> List(Enemy):
+  match hit_player:
+    case 0:
+      enemy_cons(enemy_, enemies_remove_colliders(rest, px, py))
+    case _:
+      enemies_remove_colliders(rest, px, py)
 
 # Rings and gates
 # ---------------
@@ -1566,35 +1720,47 @@ def rings_step(rings: List(Ring)) -> List(Ring):
     case []:
       empty_rings()
     case ring_<>rest:
-      match ring_:
-        case ring{x, y, spin}:
-          match y >= (board_h - 2):
-            case 0:
-              ring_cons(ring{x, y + 1, spin + 1}, rings_step(rest))
-            case _:
-              rings_step(rest)
+      rings_step_ring(ring_, rest)
+
+def rings_step_ring(ring_: Ring, rest: List(Ring)) -> List(Ring):
+  match ring_:
+    case ring{x, y, spin}:
+      rings_step_y(y >= (board_h - 2), x, y, spin, rest)
+
+def rings_step_y(at_bottom: U32, x: U32, y: U32, spin: U32, rest: List(Ring)) -> List(Ring):
+  match at_bottom:
+    case 0:
+      ring_cons(ring{x, y + 1, spin + 1}, rings_step(rest))
+    case _:
+      rings_step(rest)
 
 def rings_collect_count(rings: List(Ring), px: U32, py: U32) -> U32:
   match rings:
     case []:
       0
     case ring_<>rest:
-      match ring_collect(ring_, px, py):
-        case 0:
-          rings_collect_count(rest, px, py)
-        case _:
-          1 + rings_collect_count(rest, px, py)
+      rings_collect_count_flag(ring_collect(ring_, px, py), rest, px, py)
+
+def rings_collect_count_flag(collected: U32, rest: List(Ring), px: U32, py: U32) -> U32:
+  match collected:
+    case 0:
+      rings_collect_count(rest, px, py)
+    case _:
+      1 + rings_collect_count(rest, px, py)
 
 def rings_keep_uncollected(rings: List(Ring), px: U32, py: U32) -> List(Ring):
   match rings:
     case []:
       empty_rings()
     case ring_<>rest:
-      match ring_collect(ring_, px, py):
-        case 0:
-          ring_cons(ring_, rings_keep_uncollected(rest, px, py))
-        case _:
-          rings_keep_uncollected(rest, px, py)
+      rings_keep_uncollected_flag(ring_collect(ring_, px, py), ring_, rest, px, py)
+
+def rings_keep_uncollected_flag(collected: U32, ring_: Ring, rest: List(Ring), px: U32, py: U32) -> List(Ring):
+  match collected:
+    case 0:
+      ring_cons(ring_, rings_keep_uncollected(rest, px, py))
+    case _:
+      rings_keep_uncollected(rest, px, py)
 
 def gate_step(gate_: Gate) -> Gate:
   match gate_:
@@ -1602,11 +1768,14 @@ def gate_step(gate_: Gate) -> Gate:
       gate_none()
     case gate{x, y, gap, min_gap, close, hit}:
       gap1 = u32_max(min_gap, u32_sub_sat(gap, close));
-      match y >= (board_h - 2):
-        case 0:
-          mk_gate_state(x, y + 1, gap1, min_gap, close, hit)
-        case _:
-          gate_none()
+      gate_step_y(y >= (board_h - 2), x, y, gap1, min_gap, close, hit)
+
+def gate_step_y(at_bottom: U32, x: U32, y: U32, gap: U32, min_gap: U32, close: U32, hit: U32) -> Gate:
+  match at_bottom:
+    case 0:
+      mk_gate_state(x, y + 1, gap, min_gap, close, hit)
+    case _:
+      gate_none()
 
 def gate_mark_hit(gate_: Gate) -> Gate:
   match gate_:
@@ -1631,11 +1800,14 @@ def boss_step(boss_: Boss) -> Boss:
       boss_none()
     case boss{x, y, hp, max_hp, fire, dir, drift}:
       fire1 = u32_dec(fire);
-      match y < boss_target_y:
-        case 0:
-          boss_step_drift(x, y, hp, max_hp, fire1, dir, drift)
-        case _:
-          boss{x, y + 1, hp, max_hp, fire1, dir, drift}
+      boss_step_y(y < boss_target_y, x, y, hp, max_hp, fire1, dir, drift)
+
+def boss_step_y(above_target: U32, x: U32, y: U32, hp: U32, max_hp: U32, fire: U32, dir: DirX, drift: U32) -> Boss:
+  match above_target:
+    case 0:
+      boss_step_drift(x, y, hp, max_hp, fire, dir, drift)
+    case _:
+      boss{x, y + 1, hp, max_hp, fire, dir, drift}
 
 def boss_step_drift(x: U32, y: U32, hp: U32, max_hp: U32, fire: U32, dir: DirX, drift: U32) -> Boss:
   hit_edge = (x <= 2) | ((board_w - boss_w - 2) <= x);
@@ -1711,7 +1883,32 @@ def gain_xp_loop(
   kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
   shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
 ) -> Game:
-  match xp < xp_next:
+  gain_xp_loop_flag(
+    mode, reason, seed, tick_no, next_id, score, best, sector,
+    level, xp, xp_next, pending_upgrades, choice_a, choice_b, choice_c,
+    toast_kind, toast_value, toast_ttl,
+    player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+    move_h, move_v, move_h_ttl, move_v_ttl,
+    fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+    enemy_timer, ring_timer, gate_timer, boss_timer,
+    kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+    shots, enemy_shots, enemies, rings, gate, boss,
+    xp < xp_next
+  )
+
+def gain_xp_loop_flag(
+  mode: U32, reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32,
+  level: U32, xp: U32, xp_next: U32, pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32,
+  toast_kind: U32, toast_value: U32, toast_ttl: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32, invuln: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss,
+  needs_level: U32
+) -> Game:
+  match needs_level:
     case 0:
       gain_xp_loop(
         mode, reason, seed, tick_no, next_id, score, best, sector,
@@ -1828,54 +2025,136 @@ def take_hit(state: Game, damage: U32, penalty: U32, reason: U32) -> Game:
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
       } :: Game);
-      match invuln === 0:
-        case 0:
-          got
-        case _:
-          match player_immortal():
-            case 0:
-              match shield === 0:
-                case 0:
-                  state1 = mk_game(
-                    mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
-                    pending_upgrades, choice_a, choice_b, choice_c, toast_shield(), 0, 12,
-                    player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
-                    move_h, move_v, move_h_ttl, move_v_ttl,
-                    fire_cd, fire_rate, bullet_step, spread, pierce, shield - 1, 3,
-                    enemy_timer, ring_timer, gate_timer, boss_timer,
-                    kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-                    shots, enemy_shots, enemies, rings, gate, boss
-                  );
-                  state1
-                case _:
-                  hp1 = u32_sub_sat(player_hp, damage);
-                  score1 = sub_score(score, penalty);
-                  state1 = mk_game(
-                    mode, old_reason, seed, tick_no, next_id, score1, best, sector, level, xp, xp_next,
-                    pending_upgrades, choice_a, choice_b, choice_c, reason, 0, 14,
-                    player_x, player_y, hp1, player_max_hp, player_damage, player_speed,
-                    move_h, move_v, move_h_ttl, move_v_ttl,
-                    fire_cd, fire_rate, bullet_step, spread, pierce, shield, 5,
-                    enemy_timer, ring_timer, gate_timer, boss_timer,
-                    kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-                    shots, enemy_shots, enemies, rings, gate, boss
-                  );
-                  match hp1 === 0:
-                    case 0:
-                      state1
-                    case _:
-                      destroy_player(state1, reason)
-            case _:
-              mk_game(
-                mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
-                pending_upgrades, choice_a, choice_b, choice_c, reason, 0, 10,
-                player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
-                move_h, move_v, move_h_ttl, move_v_ttl,
-                fire_cd, fire_rate, bullet_step, spread, pierce, shield, 4,
-                enemy_timer, ring_timer, gate_timer, boss_timer,
-                kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-                shots, enemy_shots, enemies, rings, gate, boss
-              )
+      take_hit_invuln(
+        invuln, got, damage, penalty, reason,
+        mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+
+def take_hit_invuln(
+  invuln: U32,
+  got: Game,
+  damage: U32,
+  penalty: U32,
+  reason: U32,
+  mode: U32, old_reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
+) -> Game:
+  match invuln:
+    case 0:
+      take_hit_immortal(
+        player_immortal(), damage, penalty, reason,
+        mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+    case _:
+      got
+
+def take_hit_immortal(
+  immortal: U32,
+  damage: U32,
+  penalty: U32,
+  reason: U32,
+  mode: U32, old_reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
+) -> Game:
+  match immortal:
+    case 0:
+      take_hit_shield(
+        shield, damage, penalty, reason,
+        mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+    case _:
+      mk_game(
+        mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, reason, 0, 10,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, 4,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+
+def take_hit_shield(
+  shield: U32,
+  damage: U32,
+  penalty: U32,
+  reason: U32,
+  mode: U32, old_reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
+) -> Game:
+  match shield:
+    case 0:
+      take_hit_hp(
+        u32_sub_sat(player_hp, damage),
+        reason,
+        mk_game(
+          mode, old_reason, seed, tick_no, next_id, sub_score(score, penalty), best, sector, level, xp, xp_next,
+          pending_upgrades, choice_a, choice_b, choice_c, reason, 0, 14,
+          player_x, player_y, u32_sub_sat(player_hp, damage), player_max_hp, player_damage, player_speed,
+          move_h, move_v, move_h_ttl, move_v_ttl,
+          fire_cd, fire_rate, bullet_step, spread, pierce, shield, 5,
+          enemy_timer, ring_timer, gate_timer, boss_timer,
+          kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+          shots, enemy_shots, enemies, rings, gate, boss
+        )
+      )
+    case _:
+      mk_game(
+        mode, old_reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_shield(), 0, 12,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield - 1, 3,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+
+def take_hit_hp(hp1: U32, reason: U32, state1: Game) -> Game:
+  match hp1:
+    case 0:
+      destroy_player(state1, reason)
+    case _:
+      state1
 
 # Upgrades
 # --------
@@ -1978,17 +2257,20 @@ def upgrade_available(id: U32, game_: Game) -> U32:
       )
 
 def pick_upgrade_from(game_: Game, start: U32, avoid_a: U32, avoid_b: U32, fuel: U32) -> U32:
-  match fuel === 0:
+  match fuel:
     case 0:
+      8
+    case _:
       id = start % 9;
       ok = upgrade_available(id, game_) & (id !== avoid_a) & (id !== avoid_b);
-      match ok:
-        case 0:
-          pick_upgrade_from(game_, start + 1, avoid_a, avoid_b, fuel - 1)
-        case _:
-          id
+      pick_upgrade_from_ok(ok, game_, start, avoid_a, avoid_b, fuel, id)
+
+def pick_upgrade_from_ok(ok: U32, game_: Game, start: U32, avoid_a: U32, avoid_b: U32, fuel: U32, id: U32) -> U32:
+  match ok:
+    case 0:
+      pick_upgrade_from(game_, start + 1, avoid_a, avoid_b, fuel - 1)
     case _:
-      8
+      id
 
 def roll_choices(game_: Game) -> ChoicePack:
   match game_:
@@ -2042,25 +2324,45 @@ def open_upgrade_if_needed(game_: Game) -> Game:
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
       } :: Game);
-      match (mode === 1) & (0 < pending_upgrades):
-        case 0:
-          got
-        case _:
-          pack = roll_choices(got);
-          a = choice_pack_a(pack);
-          b = choice_pack_b(pack);
-          c = choice_pack_c(pack);
-          seed1 = choice_pack_seed(pack);
-          mk_game(
-            2, reason, seed1, tick_no, next_id, score, best, sector, level, xp, xp_next,
-            pending_upgrades - 1, a, b, c, toast_upgrade_prompt(), level, 20,
-            player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
-            0, 0, 0, 0,
-            fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
-            enemy_timer, ring_timer, gate_timer, boss_timer,
-            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-            shots, enemy_shots, enemies, rings, gate, boss
-          )
+      open_upgrade_if_needed_flag(
+        (mode === 1) & (0 < pending_upgrades), got,
+        reason, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+
+def open_upgrade_if_needed_flag(
+  should_open: U32,
+  got: Game,
+  reason: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32, invuln: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), gate: Gate, boss: Boss
+) -> Game:
+  match should_open:
+    case 0:
+      got
+    case _:
+      pack = roll_choices(got);
+      a = choice_pack_a(pack);
+      b = choice_pack_b(pack);
+      c = choice_pack_c(pack);
+      seed1 = choice_pack_seed(pack);
+      mk_game(
+        2, reason, seed1, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades - 1, a, b, c, toast_upgrade_prompt(), level, 20,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        0, 0, 0, 0,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
 
 def apply_upgrade_id(
   id: U32,
@@ -2331,15 +2633,21 @@ def tick_spawn_phase(state: Game) -> Game:
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
       } :: Game);
-      match boss_exists(boss):
-        case 0:
-          match boss_timer === 0:
-            case 0:
-              tick_spawn_misc(got)
-            case _:
-              spawn_boss(got)
-        case _:
-          got
+      tick_spawn_phase_boss(boss_exists(boss), boss_timer, got)
+
+def tick_spawn_phase_boss(boss_live: U32, boss_timer: U32, got: Game) -> Game:
+  match boss_live:
+    case 0:
+      tick_spawn_phase_timer(boss_timer, got)
+    case _:
+      got
+
+def tick_spawn_phase_timer(boss_timer: U32, got: Game) -> Game:
+  match boss_timer:
+    case 0:
+      spawn_boss(got)
+    case _:
+      tick_spawn_misc(got)
 
 def tick_spawn_misc(state: Game) -> Game:
   match state:
@@ -2489,7 +2797,10 @@ def boss_dead_now(before: Boss, after: Boss) -> U32:
           (0 < hp) & (ahp === 0)
 
 def boss_xp_gain(before: Boss, after: Boss) -> U32:
-  match boss_dead_now(before, after):
+  boss_xp_gain_flag(boss_dead_now(before, after))
+
+def boss_xp_gain_flag(dead_now: U32) -> U32:
+  match dead_now:
     case 0:
       0
     case _:
@@ -2570,33 +2881,42 @@ def enemy_shots_keep(shots: List(EnemyShot), px: U32, py: U32) -> List(EnemyShot
     case []:
       empty_enemy_shots()
     case shot_<>rest:
-      match enemy_shot_hits_player(shot_, px, py):
-        case 0:
-          enemy_shot_cons(shot_, enemy_shots_keep(rest, px, py))
-        case _:
-          enemy_shots_keep(rest, px, py)
+      enemy_shots_keep_hit(enemy_shot_hits_player(shot_, px, py), shot_, rest, px, py)
+
+def enemy_shots_keep_hit(hit_player: U32, shot_: EnemyShot, rest: List(EnemyShot), px: U32, py: U32) -> List(EnemyShot):
+  match hit_player:
+    case 0:
+      enemy_shot_cons(shot_, enemy_shots_keep(rest, px, py))
+    case _:
+      enemy_shots_keep(rest, px, py)
 
 def first_hit_shot(shots: List(EnemyShot), px: U32, py: U32) -> EnemyShot:
   match shots:
     case []:
       eshot{0, 0, dir_stay(), 0}
     case shot_<>rest:
-      match enemy_shot_hits_player(shot_, px, py):
-        case 0:
-          first_hit_shot(rest, px, py)
-        case _:
-          shot_
+      first_hit_shot_hit(enemy_shot_hits_player(shot_, px, py), shot_, rest, px, py)
+
+def first_hit_shot_hit(hit_player: U32, shot_: EnemyShot, rest: List(EnemyShot), px: U32, py: U32) -> EnemyShot:
+  match hit_player:
+    case 0:
+      first_hit_shot(rest, px, py)
+    case _:
+      shot_
 
 def any_enemy_shot_hit(shots: List(EnemyShot), px: U32, py: U32) -> U32:
   match shots:
     case []:
       0
     case shot_<>rest:
-      match enemy_shot_hits_player(shot_, px, py):
-        case 0:
-          any_enemy_shot_hit(rest, px, py)
-        case _:
-          1
+      any_enemy_shot_hit_flag(enemy_shot_hits_player(shot_, px, py), rest, px, py)
+
+def any_enemy_shot_hit_flag(hit_player: U32, rest: List(EnemyShot), px: U32, py: U32) -> U32:
+  match hit_player:
+    case 0:
+      any_enemy_shot_hit(rest, px, py)
+    case _:
+      1
 
 def tick_collision_phase(state: Game) -> Game:
   match state:
@@ -2675,14 +2995,20 @@ def shot_reason(shot_: EnemyShot) -> U32:
           toast_boss_barrage()
 
 def toast_kind_after_ring(rings: List(Ring), px: U32, py: U32, old: U32) -> U32:
-  match 0 < rings_collect_count(rings, px, py):
+  toast_kind_after_ring_flag(rings_collect_count(rings, px, py), old)
+
+def toast_kind_after_ring_flag(collected: U32, old: U32) -> U32:
+  match collected:
     case 0:
       old
     case _:
       toast_ring()
 
 def toast_ttl_after_ring(rings: List(Ring), px: U32, py: U32, old: U32) -> U32:
-  match 0 < rings_collect_count(rings, px, py):
+  toast_ttl_after_ring_flag(rings_collect_count(rings, px, py), old)
+
+def toast_ttl_after_ring_flag(collected: U32, old: U32) -> U32:
+  match collected:
     case 0:
       old
     case _:
@@ -2912,8 +3238,10 @@ def remove_enemy_colliders(state: Game) -> Game:
       )
 
 def apply_escape_penalty(state: Game, escaped: U32) -> Game:
-  match escaped === 0:
+  match escaped:
     case 0:
+      state
+    case _:
       with_score(
         set_toast(
           with_enemies(state, enemies_remove_escaped(enemies_of(state))),
@@ -2923,8 +3251,6 @@ def apply_escape_penalty(state: Game, escaped: U32) -> Game:
         ),
         sub_score(score_of(state), escaped * 70)
       )
-    case _:
-      state
 
 def with_enemies(state: Game, enemies: List(Enemy)) -> Game:
   match state:
@@ -2980,24 +3306,50 @@ def apply_movement(evt: StarfoxEvent, state: Game) -> Game:
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
       } :: Game);
-      match gate_hits_player(gate, player_x, player_y):
-        case 0:
-          x_try = movement_x(evt, player_x, player_speed);
-          x1 = gate_block_player_x(gate, player_x, player_y, x_try);
-          y_try = movement_y(evt, player_y, player_speed);
-          y1 = gate_block_player_y(gate, x1, player_y, y_try);
-          mk_game(
-            mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
-            pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
-            x1, y1, player_hp, player_max_hp, player_damage, player_speed,
-            move_h, move_v, move_h_ttl, move_v_ttl,
-            fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
-            enemy_timer, ring_timer, gate_timer, boss_timer,
-            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-            shots, enemy_shots, enemies, rings, gate, boss
-          )
-        case _:
-          destroy_player(with_gate_hit(got), toast_gate_crush())
+      apply_movement_gate(
+        gate_hits_player(gate, player_x, player_y), evt, got, gate,
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, boss
+      )
+
+def apply_movement_gate(
+  gate_hit: U32,
+  evt: StarfoxEvent,
+  got: Game,
+  gate: Gate,
+  mode: U32, reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32, toast_kind: U32, toast_value: U32, toast_ttl: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32, invuln: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), boss: Boss
+) -> Game:
+  match gate_hit:
+    case 0:
+      x_try = movement_x(evt, player_x, player_speed);
+      x1 = gate_block_player_x(gate, player_x, player_y, x_try);
+      y_try = movement_y(evt, player_y, player_speed);
+      y1 = gate_block_player_y(gate, x1, player_y, y_try);
+      mk_game(
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+    case _:
+      destroy_player(with_gate_hit(got), toast_gate_crush())
 
 def remember_move_h(evt: StarfoxEvent, move_h: U32) -> U32:
   match evt:
@@ -3076,7 +3428,10 @@ def held_move_x_dir(move_h: U32, player_x: U32, player_speed: U32) -> U32:
       player_x
 
 def held_move_x(move_h: U32, move_h_ttl: U32, player_x: U32, player_speed: U32) -> U32:
-  match held_move_ready(move_h_ttl):
+  held_move_x_ready(held_move_ready(move_h_ttl), move_h, player_x, player_speed)
+
+def held_move_x_ready(can_move: U32, move_h: U32, player_x: U32, player_speed: U32) -> U32:
+  match can_move:
     case 0:
       player_x
     case _:
@@ -3092,7 +3447,10 @@ def held_move_y_dir(move_v: U32, player_y: U32, player_speed: U32) -> U32:
       player_y
 
 def held_move_y(move_v: U32, move_v_ttl: U32, player_y: U32, player_speed: U32) -> U32:
-  match held_move_ready(move_v_ttl):
+  held_move_y_ready(held_move_ready(move_v_ttl), move_v, player_y, player_speed)
+
+def held_move_y_ready(can_move: U32, move_v: U32, player_y: U32, player_speed: U32) -> U32:
+  match can_move:
     case 0:
       player_y
     case _:
@@ -3120,24 +3478,49 @@ def apply_held_movement(state: Game) -> Game:
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
       } :: Game);
-      match gate_hits_player(gate, player_x, player_y):
-        case 0:
-          x_try = held_move_x(move_h, move_h_ttl, player_x, player_speed);
-          x1 = gate_block_player_x(gate, player_x, player_y, x_try);
-          y_try = held_move_y(move_v, move_v_ttl, player_y, player_speed);
-          y1 = gate_block_player_y(gate, x1, player_y, y_try);
-          mk_game(
-            mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
-            pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
-            x1, y1, player_hp, player_max_hp, player_damage, player_speed,
-            move_h, move_v, move_h_ttl, move_v_ttl,
-            fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
-            enemy_timer, ring_timer, gate_timer, boss_timer,
-            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
-            shots, enemy_shots, enemies, rings, gate, boss
-          )
-        case _:
-          destroy_player(with_gate_hit(got), toast_gate_crush())
+      apply_held_movement_gate(
+        gate_hits_player(gate, player_x, player_y), got, gate,
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, boss
+      )
+
+def apply_held_movement_gate(
+  gate_hit: U32,
+  got: Game,
+  gate: Gate,
+  mode: U32, reason: U32, seed: U32, tick_no: U32, next_id: U32, score: U32, best: U32, sector: U32, level: U32, xp: U32, xp_next: U32,
+  pending_upgrades: U32, choice_a: U32, choice_b: U32, choice_c: U32, toast_kind: U32, toast_value: U32, toast_ttl: U32,
+  player_x: U32, player_y: U32, player_hp: U32, player_max_hp: U32, player_damage: U32, player_speed: U32,
+  move_h: U32, move_v: U32, move_h_ttl: U32, move_v_ttl: U32,
+  fire_cd: U32, fire_rate: U32, bullet_step: U32, spread: U32, pierce: U32, shield: U32, invuln: U32,
+  enemy_timer: U32, ring_timer: U32, gate_timer: U32, boss_timer: U32,
+  kills: U32, bosses: U32, hull_up: U32, damage_up: U32, thruster_up: U32, loader_up: U32, wing_up: U32, pierce_up: U32, shield_up: U32, rail_up: U32, repair_up: U32,
+  shots: List(PlayerShot), enemy_shots: List(EnemyShot), enemies: List(Enemy), rings: List(Ring), boss: Boss
+) -> Game:
+  match gate_hit:
+    case 0:
+      x_try = held_move_x(move_h, move_h_ttl, player_x, player_speed);
+      x1 = gate_block_player_x(gate, player_x, player_y, x_try);
+      y_try = held_move_y(move_v, move_v_ttl, player_y, player_speed);
+      y1 = gate_block_player_y(gate, x1, player_y, y_try);
+      mk_game(
+        mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+        pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+        x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+        move_h, move_v, move_h_ttl, move_v_ttl,
+        fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+        enemy_timer, ring_timer, gate_timer, boss_timer,
+        kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+        shots, enemy_shots, enemies, rings, gate, boss
+      )
+    case _:
+      destroy_player(with_gate_hit(got), toast_gate_crush())
 
 def decay_move(state: Game) -> Game:
   match state:
@@ -3260,21 +3643,14 @@ def event_code(evt: StarfoxEvent) -> U32:
       11
 
 def starfox_on_event(evt: StarfoxEvent, game_: Game) -> Game:
-  mode = game_mode(game_);
-  code = event_code(evt);
+  starfox_on_event_code(event_code(evt), game_mode(game_), evt, game_)
+
+def starfox_on_event_code(code: U32, mode: U32, evt: StarfoxEvent, game_: Game) -> Game:
   match code:
     case 0:
-      match mode === 1:
-        case 0:
-          game_
-        case _:
-          game_tick(game_)
+      starfox_on_event_tick(mode, game_)
     case 1:
-      match mode === 1:
-        case 0:
-          game_
-        case _:
-          move_tick_game(game_)
+      starfox_on_event_move_tick(mode, game_)
     case 2:
       starfox_move_evt(evt, game_)
     case 3:
@@ -3284,83 +3660,91 @@ def starfox_on_event(evt: StarfoxEvent, game_: Game) -> Game:
     case 5:
       starfox_move_evt(evt, game_)
     case 6:
-      match mode === 0:
-        case 0:
-          match mode === 3:
-            case 0:
-              match mode === 2:
-                case 0:
-                  fire_now(game_)
-                case _:
-                  game_
-            case _:
-              game_start_from(game_reset(best_of(game_)))
-        case _:
-          game_start_from(game_)
+      starfox_on_event_fire(mode, game_)
     case 7:
       game_reset(best_of(game_))
     case 8:
-      match mode === 2:
-        case 0:
-          game_
-        case _:
-          choose_upgrade(evt_choice_1(), game_)
+      starfox_on_event_choose(mode, evt_choice_1(), game_)
     case 9:
-      match mode === 2:
-        case 0:
-          game_
-        case _:
-          choose_upgrade(evt_choice_2(), game_)
+      starfox_on_event_choose(mode, evt_choice_2(), game_)
     case 10:
-      match mode === 2:
-        case 0:
-          game_
-        case _:
-          choose_upgrade(evt_choice_3(), game_)
+      starfox_on_event_choose(mode, evt_choice_3(), game_)
+    case _:
+      game_
+
+def starfox_on_event_tick(mode: U32, game_: Game) -> Game:
+  match mode:
+    case 1:
+      game_tick(game_)
+    case _:
+      game_
+
+def starfox_on_event_move_tick(mode: U32, game_: Game) -> Game:
+  match mode:
+    case 1:
+      move_tick_game(game_)
+    case _:
+      game_
+
+def starfox_on_event_fire(mode: U32, game_: Game) -> Game:
+  match mode:
+    case 0:
+      game_start_from(game_)
+    case 2:
+      game_
+    case 3:
+      game_start_from(game_reset(best_of(game_)))
+    case _:
+      fire_now(game_)
+
+def starfox_on_event_choose(mode: U32, evt: StarfoxEvent, game_: Game) -> Game:
+  match mode:
+    case 2:
+      choose_upgrade(evt, game_)
     case _:
       game_
 
 def starfox_move_evt(evt: StarfoxEvent, game_: Game) -> Game:
-  mode = game_mode(game_);
-  match mode === 0:
+  starfox_move_evt_mode(game_mode(game_), evt, game_)
+
+def starfox_move_evt_mode(mode: U32, evt: StarfoxEvent, game_: Game) -> Game:
+  match mode:
     case 0:
-      match mode === 3:
-        case 0:
-          match mode === 2:
-            case 0:
-              remember_move(evt, apply_movement(evt, game_))
-            case _:
-              game_
-        case _:
-          remember_move(evt, apply_movement(evt, game_start_from(game_reset(best_of(game_)))))
-    case _:
       remember_move(evt, apply_movement(evt, game_start_from(game_)))
+    case 2:
+      game_
+    case 3:
+      remember_move(evt, apply_movement(evt, game_start_from(game_reset(best_of(game_)))))
+    case _:
+      remember_move(evt, apply_movement(evt, game_))
 
 # Rendering strings
 # -----------------
 
 def phase_name(mode: U32, gate: Gate, boss: Boss, sector: U32) -> String:
-  match mode === 0:
+  match mode:
     case 0:
-      match mode === 2:
-        case 0:
-          match mode === 3:
-            case 0:
-              match boss_exists(boss):
-                case 0:
-                  match gate_exists(gate):
-                    case 0:
-                      "Sector " ++ two_digits(sector)
-                    case _:
-                      "Gate Run"
-                case _:
-                  "Boss Assault"
-            case _:
-              "Debrief"
-        case _:
-          "Upgrade Bay"
-    case _:
       "Stand By"
+    case 2:
+      "Upgrade Bay"
+    case 3:
+      "Debrief"
+    case _:
+      phase_name_boss(boss_exists(boss), gate_exists(gate), sector)
+
+def phase_name_boss(boss_live: U32, gate_live: U32, sector: U32) -> String:
+  match boss_live:
+    case 0:
+      phase_name_gate(gate_live, sector)
+    case _:
+      "Boss Assault"
+
+def phase_name_gate(gate_live: U32, sector: U32) -> String:
+  match gate_live:
+    case 0:
+      "Sector " ++ two_digits(sector)
+    case _:
+      "Gate Run"
 
 def shell_tone(mode: U32) -> String:
   match mode:
@@ -3385,38 +3769,52 @@ def lead_copy(mode: U32) -> String:
       "The run is over. Press Space, F, Enter, any move button, use Relaunch, or hit Restart to return to standby."
 
 def two_digits(value: U32) -> String:
-  match value < 10:
+  two_digits_flag(value, value < 10)
+
+def two_digits_flag(value: U32, lt_10: U32) -> String:
+  match lt_10:
     case 0:
       show_u32(value)
     case _:
       "0" ++ show_u32(value)
 
 def score_text(score: U32) -> String:
-  match score < 10:
+  score_text_lt_10(score, score < 10)
+
+def score_text_lt_10(score: U32, lt_10: U32) -> String:
+  match lt_10:
     case 0:
-      match score < 100:
-        case 0:
-          match score < 1000:
-            case 0:
-              match score < 10000:
-                case 0:
-                  match score < 100000:
-                    case 0:
-                      match score < 1000000:
-                        case 0:
-                          show_u32(score)
-                        case _:
-                          show_u32(score)
-                    case _:
-                      "0" ++ show_u32(score)
-                case _:
-                  "00" ++ show_u32(score)
-            case _:
-              "000" ++ show_u32(score)
-        case _:
-          "0000" ++ show_u32(score)
+      score_text_lt_100(score, score < 100)
     case _:
       "00000" ++ show_u32(score)
+
+def score_text_lt_100(score: U32, lt_100: U32) -> String:
+  match lt_100:
+    case 0:
+      score_text_lt_1000(score, score < 1000)
+    case _:
+      "0000" ++ show_u32(score)
+
+def score_text_lt_1000(score: U32, lt_1000: U32) -> String:
+  match lt_1000:
+    case 0:
+      score_text_lt_10000(score, score < 10000)
+    case _:
+      "000" ++ show_u32(score)
+
+def score_text_lt_10000(score: U32, lt_10000: U32) -> String:
+  match lt_10000:
+    case 0:
+      score_text_lt_100000(score, score < 100000)
+    case _:
+      "00" ++ show_u32(score)
+
+def score_text_lt_100000(score: U32, lt_100000: U32) -> String:
+  match lt_100000:
+    case 0:
+      show_u32(score)
+    case _:
+      "0" ++ show_u32(score)
 
 def clock_text_ticks(ticks: U32) -> String:
   secs = ((ticks * tick_ms) + 999) / 1000;
@@ -3427,27 +3825,28 @@ def clock_text_ticks(ticks: U32) -> String:
 def boss_chip_text(boss_: Boss, boss_timer: U32, mode: U32, level: U32) -> String:
   match boss_:
     case no_boss{}:
-      match mode === 2:
-        case 0:
-          match mode === 3:
-            case 0:
-              clock_text_ticks(boss_timer)
-            case _:
-              "Retry"
-        case _:
-          "Lv " ++ two_digits(level)
+      boss_chip_text_mode(mode, boss_timer, level)
     case boss{x, y, hp, max_hp, fire, dir, drift}:
       show_u32(hp) ++ "/" ++ show_u32(max_hp) ++ " HP"
+
+def boss_chip_text_mode(mode: U32, boss_timer: U32, level: U32) -> String:
+  match mode:
+    case 2:
+      "Lv " ++ two_digits(level)
+    case 3:
+      "Retry"
+    case _:
+      clock_text_ticks(boss_timer)
 
 def hull_text(player_hp: U32, player_max_hp: U32, shield: U32) -> String:
   two_digits(player_hp) ++ "/" ++ two_digits(player_max_hp) ++ " +S" ++ show_u32(shield)
 
 def hp_fill_pct(player_hp: U32, player_max_hp: U32) -> U32:
-  match player_hp === 0:
+  match player_hp:
     case 0:
-      u32_max(6, (100 * player_hp) / player_max_hp)
-    case _:
       0
+    case _:
+      u32_max(6, (100 * player_hp) / player_max_hp)
 
 def hp_fill_style(player_hp: U32, player_max_hp: U32) -> String:
   "width:" ++ show_u32(hp_fill_pct(player_hp, player_max_hp)) ++ "%"
@@ -3536,11 +3935,11 @@ def toast_text(kind: U32, value: U32) -> String:
       toast_msg_enemy_down()
 
 def toast_view(kind: U32, value: U32, ttl: U32) -> String:
-  match ttl === 0:
+  match ttl:
     case 0:
-      toast_text(kind, value)
-    case _:
       empty_string()
+    case _:
+      toast_text(kind, value)
 
 def build_stat(label: String, value: U32) -> HTML(StarfoxEvent):
   <div class="buildline">
@@ -3570,77 +3969,98 @@ def enemy_list_class(enemies: List(Enemy), x: U32, y: U32) -> String:
     case []:
       empty_string()
     case enemy_<>rest:
-      match enemy_has_cell(enemy_, x, y):
-        case 0:
-          enemy_list_class(rest, x, y)
-        case _:
-          enemy_cell_cls(enemy_)
+      enemy_list_class_hit(enemy_has_cell(enemy_, x, y), enemy_, rest, x, y)
+
+def enemy_list_class_hit(hit_here: U32, enemy_: Enemy, rest: List(Enemy), x: U32, y: U32) -> String:
+  match hit_here:
+    case 0:
+      enemy_list_class(rest, x, y)
+    case _:
+      enemy_cell_cls(enemy_)
 
 def enemy_list_has(enemies: List(Enemy), x: U32, y: U32) -> U32:
   match enemies:
     case []:
       0
     case enemy_<>rest:
-      match enemy_has_cell(enemy_, x, y):
-        case 0:
-          enemy_list_has(rest, x, y)
-        case _:
-          1
+      enemy_list_has_hit(enemy_has_cell(enemy_, x, y), rest, x, y)
+
+def enemy_list_has_hit(hit_here: U32, rest: List(Enemy), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      enemy_list_has(rest, x, y)
+    case _:
+      1
 
 def ring_list_has(rings: List(Ring), x: U32, y: U32) -> U32:
   match rings:
     case []:
       0
     case ring_<>rest:
-      match ring_has_cell(ring_, x, y):
-        case 0:
-          ring_list_has(rest, x, y)
-        case _:
-          1
+      ring_list_has_hit(ring_has_cell(ring_, x, y), rest, x, y)
+
+def ring_list_has_hit(hit_here: U32, rest: List(Ring), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      ring_list_has(rest, x, y)
+    case _:
+      1
 
 def shot_list_has(shots: List(PlayerShot), x: U32, y: U32) -> U32:
   match shots:
     case []:
       0
     case pshot{sx, sy, dir, damage}<>rest:
-      match (sx === x) & (sy === y):
-        case 0:
-          shot_list_has(rest, x, y)
-        case _:
-          1
+      shot_list_has_hit((sx === x) & (sy === y), rest, x, y)
+
+def shot_list_has_hit(hit_here: U32, rest: List(PlayerShot), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      shot_list_has(rest, x, y)
+    case _:
+      1
 
 def enemy_shot_list_class(shots: List(EnemyShot), x: U32, y: U32) -> String:
   match shots:
     case []:
       empty_string()
     case eshot{sx, sy, dir, boss}<>rest:
-      match (sx === x) & (sy === y):
-        case 0:
-          enemy_shot_list_class(rest, x, y)
-        case _:
-          pick_string(boss, "cell enemy-shot", "cell enemy-shot boss")
+      enemy_shot_list_class_hit((sx === x) & (sy === y), boss, rest, x, y)
+
+def enemy_shot_list_class_hit(hit_here: U32, boss: U32, rest: List(EnemyShot), x: U32, y: U32) -> String:
+  match hit_here:
+    case 0:
+      enemy_shot_list_class(rest, x, y)
+    case _:
+      pick_string(boss, "cell enemy-shot", "cell enemy-shot boss")
 
 def enemy_shot_list_has(shots: List(EnemyShot), x: U32, y: U32) -> U32:
   match shots:
     case []:
       0
     case eshot{sx, sy, dir, boss}<>rest:
-      match (sx === x) & (sy === y):
-        case 0:
-          enemy_shot_list_has(rest, x, y)
-        case _:
-          1
+      enemy_shot_list_has_hit((sx === x) & (sy === y), rest, x, y)
+
+def enemy_shot_list_has_hit(hit_here: U32, rest: List(EnemyShot), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      enemy_shot_list_has(rest, x, y)
+    case _:
+      1
 
 def enemy_shot_list_boss(shots: List(EnemyShot), x: U32, y: U32) -> U32:
   match shots:
     case []:
       0
     case eshot{sx, sy, dir, boss}<>rest:
-      match (sx === x) & (sy === y):
-        case 0:
-          enemy_shot_list_boss(rest, x, y)
-        case _:
-          boss
+      enemy_shot_list_boss_hit((sx === x) & (sy === y), boss, rest, x, y)
+
+def enemy_shot_list_boss_hit(hit_here: U32, boss: U32, rest: List(EnemyShot), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      enemy_shot_list_boss(rest, x, y)
+    case _:
+      boss
 
 def boss_class_if(boss_: Boss, x: U32, y: U32) -> String:
   match boss_:
@@ -3648,11 +4068,14 @@ def boss_class_if(boss_: Boss, x: U32, y: U32) -> String:
       empty_string()
     case boss{bx, by, hp, max_hp, fire, dir, drift}:
       got = (boss{bx, by, hp, max_hp, fire, dir, drift} :: Boss);
-      match boss_has_cell(got, x, y):
-        case 0:
-          empty_string()
-        case _:
-          boss_cell_cls(u32_sub_sat(y, by), u32_sub_sat(x, bx))
+      boss_class_if_hit(boss_has_cell(got, x, y), by, bx, x, y)
+
+def boss_class_if_hit(hit_here: U32, by: U32, bx: U32, x: U32, y: U32) -> String:
+  match hit_here:
+    case 0:
+      empty_string()
+    case _:
+      boss_cell_cls(u32_sub_sat(y, by), u32_sub_sat(x, bx))
 
 def cell_bg_or_shield(
   player_x: U32,
@@ -3663,7 +4086,15 @@ def cell_bg_or_shield(
   x: U32,
   y: U32
 ) -> String:
-  match player_hitbox_has(player_x, player_y, x, y) & (0 < shield) & (invuln === 0):
+  cell_bg_or_shield_hit(
+    player_hitbox_has(player_x, player_y, x, y) & (0 < shield) & (invuln === 0),
+    tick_no,
+    x,
+    y
+  )
+
+def cell_bg_or_shield_hit(hit_shield: U32, tick_no: U32, x: U32, y: U32) -> String:
+  match hit_shield:
     case 0:
       bg_cell_cls(x, y, tick_no)
     case _:
@@ -3680,15 +4111,52 @@ def cell_after_enemy_shot(
   x: U32,
   y: U32
 ) -> String:
-  match enemy_shot_list_has(enemy_shots, x, y):
+  cell_after_enemy_shot_has(
+    enemy_shot_list_has(enemy_shots, x, y),
+    enemy_shots,
+    rings,
+    player_x,
+    player_y,
+    shield,
+    invuln,
+    tick_no,
+    x,
+    y
+  )
+
+def cell_after_enemy_shot_has(
+  enemy_shot_here: U32,
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  tick_no: U32,
+  x: U32,
+  y: U32
+) -> String:
+  match enemy_shot_here:
     case 0:
-      match ring_list_has(rings, x, y):
-        case 0:
-          cell_bg_or_shield(player_x, player_y, shield, invuln, tick_no, x, y)
-        case _:
-          "cell ring"
+      cell_after_enemy_shot_ring(ring_list_has(rings, x, y), player_x, player_y, shield, invuln, tick_no, x, y)
     case _:
       pick_string(enemy_shot_list_boss(enemy_shots, x, y), "cell enemy-shot", "cell enemy-shot boss")
+
+def cell_after_enemy_shot_ring(
+  ring_here: U32,
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  tick_no: U32,
+  x: U32,
+  y: U32
+) -> String:
+  match ring_here:
+    case 0:
+      cell_bg_or_shield(player_x, player_y, shield, invuln, tick_no, x, y)
+    case _:
+      "cell ring"
 
 def cell_after_shot(
   shots: List(PlayerShot),
@@ -3702,7 +4170,32 @@ def cell_after_shot(
   x: U32,
   y: U32
 ) -> String:
-  match shot_list_has(shots, x, y):
+  cell_after_shot_has(
+    shot_list_has(shots, x, y),
+    enemy_shots,
+    rings,
+    player_x,
+    player_y,
+    shield,
+    invuln,
+    tick_no,
+    x,
+    y
+  )
+
+def cell_after_shot_has(
+  shot_here: U32,
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  tick_no: U32,
+  x: U32,
+  y: U32
+) -> String:
+  match shot_here:
     case 0:
       cell_after_enemy_shot(enemy_shots, rings, player_x, player_y, shield, invuln, tick_no, x, y)
     case _:
@@ -3781,23 +4274,34 @@ def player_cell_shape_code(row: U32, col: U32) -> U32:
     case 3:
       9
     case _:
-      match col:
-        case 2:
-          7
-        case _:
-          6
+      player_cell_shape_code_col(col)
+
+def player_cell_shape_code_col(col: U32) -> U32:
+  match col:
+    case 2:
+      7
+    case _:
+      6
 
 def player_cell_code(player_x: U32, player_y: U32, x: U32, y: U32) -> U32:
-  row = u32_sub_sat(y, player_y);
-  col = u32_sub_sat(x, player_x);
-  match player_has_cell(player_x, player_y, x, y):
+  player_cell_code_has(
+    player_has_cell(player_x, player_y, x, y),
+    u32_sub_sat(y, player_y),
+    u32_sub_sat(x, player_x)
+  )
+
+def player_cell_code_has(has_player: U32, row: U32, col: U32) -> U32:
+  match has_player:
     case 0:
       0
     case _:
       player_cell_shape_code(row, col)
 
 def enemy_kind_code(enemy_: Enemy) -> U32:
-  match enemy_kind(enemy_) === 0:
+  enemy_kind_code_kind(enemy_kind(enemy_))
+
+def enemy_kind_code_kind(kind: U32) -> U32:
+  match kind:
     case 0:
       10
     case _:
@@ -3808,28 +4312,38 @@ def enemy_list_code(enemies: List(Enemy), x: U32, y: U32) -> U32:
     case []:
       0
     case enemy_<>rest:
-      match enemy_has_cell(enemy_, x, y):
-        case 0:
-          enemy_list_code(rest, x, y)
-        case _:
-          enemy_kind_code(enemy_)
+      enemy_list_code_hit(enemy_has_cell(enemy_, x, y), enemy_, rest, x, y)
+
+def enemy_list_code_hit(hit_here: U32, enemy_: Enemy, rest: List(Enemy), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      enemy_list_code(rest, x, y)
+    case _:
+      enemy_kind_code(enemy_)
 
 def boss_cell_code(boss_: Boss, x: U32, y: U32) -> U32:
   match boss_:
     case no_boss{}:
       0
     case boss{bx, by, hp, max_hp, fire, dir, drift}:
-      match boss_has_cell((boss{bx, by, hp, max_hp, fire, dir, drift} :: Boss), x, y):
-        case 0:
-          0
-        case _:
-          row = u32_sub_sat(y, by);
-          col = u32_sub_sat(x, bx);
-          match (row === 2) & (3 <= col) & (col <= 7):
-            case 0:
-              12
-            case _:
-              13
+      boss_cell_code_has(boss_has_cell((boss{bx, by, hp, max_hp, fire, dir, drift} :: Boss), x, y), bx, by, x, y)
+
+def boss_cell_code_has(has_boss: U32, bx: U32, by: U32, x: U32, y: U32) -> U32:
+  match has_boss:
+    case 0:
+      0
+    case _:
+      boss_cell_code_core(u32_sub_sat(y, by), u32_sub_sat(x, bx))
+
+def boss_cell_code_core(row: U32, col: U32) -> U32:
+  boss_cell_code_core_flag((row === 2) & (3 <= col) & (col <= 7))
+
+def boss_cell_code_core_flag(is_core: U32) -> U32:
+  match is_core:
+    case 0:
+      12
+    case _:
+      13
 
 def enemy_shot_kind_code(boss: U32) -> U32:
   match boss:
@@ -3843,11 +4357,14 @@ def enemy_shot_code(shots: List(EnemyShot), x: U32, y: U32) -> U32:
     case []:
       0
     case eshot{sx, sy, dir, boss}<>rest:
-      match (sx === x) & (sy === y):
-        case 0:
-          enemy_shot_code(rest, x, y)
-        case _:
-          enemy_shot_kind_code(boss)
+      enemy_shot_code_hit((sx === x) & (sy === y), boss, rest, x, y)
+
+def enemy_shot_code_hit(hit_here: U32, boss: U32, rest: List(EnemyShot), x: U32, y: U32) -> U32:
+  match hit_here:
+    case 0:
+      enemy_shot_code(rest, x, y)
+    case _:
+      enemy_shot_kind_code(boss)
 
 def cls_shield() -> String:
   "cell shield"
@@ -3930,57 +4447,213 @@ def cell_code_cls(code: U32, bg: String) -> String:
       bg
 
 def cell_code(game_: Game, x: U32, y: U32) -> U32:
-  gate = gate_of(game_);
-  boss = boss_of(game_);
-  enemies = enemies_of(game_);
-  shots = shots_of(game_);
-  enemy_shots = enemy_shots_of(game_);
-  rings = rings_of(game_);
-  player_x = player_x_of(game_);
-  player_y = player_y_of(game_);
-  shield = shield_of(game_);
-  invuln = invuln_of(game_);
-  match gate_edge_cell(gate, x, y):
+  cell_code_values(
+    gate_of(game_),
+    boss_of(game_),
+    enemies_of(game_),
+    shots_of(game_),
+    enemy_shots_of(game_),
+    rings_of(game_),
+    player_x_of(game_),
+    player_y_of(game_),
+    shield_of(game_),
+    invuln_of(game_),
+    x,
+    y
+  )
+
+def cell_code_values(
+  gate: Gate,
+  boss: Boss,
+  enemies: List(Enemy),
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  cell_code_gate(
+    gate_edge_cell(gate, x, y),
+    gate_has_cell(gate, x, y),
+    boss,
+    enemies,
+    shots,
+    enemy_shots,
+    rings,
+    player_x,
+    player_y,
+    shield,
+    invuln,
+    x,
+    y
+  )
+
+def cell_code_gate(
+  gate_edge: U32,
+  gate_fill: U32,
+  boss: Boss,
+  enemies: List(Enemy),
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match gate_edge:
     case 0:
-      match gate_has_cell(gate, x, y):
-        case 0:
-          code_boss = boss_cell_code(boss, x, y);
-          match code_boss === 0:
-            case 0:
-              code_boss
-            case _:
-              code_enemy = enemy_list_code(enemies, x, y);
-              match code_enemy === 0:
-                case 0:
-                  code_enemy
-                case _:
-                  code_player = player_cell_code(player_x, player_y, x, y);
-                  match code_player === 0:
-                    case 0:
-                      code_player
-                    case _:
-                      match shot_list_has(shots, x, y):
-                        case 0:
-                          code_enemy_shot = enemy_shot_code(enemy_shots, x, y);
-                          match code_enemy_shot === 0:
-                            case 0:
-                              code_enemy_shot
-                            case _:
-                              match ring_list_has(rings, x, y):
-                                case 0:
-                                  match player_hitbox_has(player_x, player_y, x, y) & (0 < shield) & (invuln === 0):
-                                    case 0:
-                                      0
-                                    case _:
-                                      1
-                                case _:
-                                  2
-                        case _:
-                          5
-        case _:
-          14
+      cell_code_fill(gate_fill, boss, enemies, shots, enemy_shots, rings, player_x, player_y, shield, invuln, x, y)
     case _:
       15
+
+def cell_code_fill(
+  gate_fill: U32,
+  boss: Boss,
+  enemies: List(Enemy),
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match gate_fill:
+    case 0:
+      cell_code_boss(
+        boss_cell_code(boss, x, y),
+        enemies,
+        shots,
+        enemy_shots,
+        rings,
+        player_x,
+        player_y,
+        shield,
+        invuln,
+        x,
+        y
+      )
+    case _:
+      14
+
+def cell_code_boss(
+  code_boss: U32,
+  enemies: List(Enemy),
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match code_boss:
+    case 0:
+      cell_code_enemy(enemy_list_code(enemies, x, y), shots, enemy_shots, rings, player_x, player_y, shield, invuln, x, y)
+    case _:
+      code_boss
+
+def cell_code_enemy(
+  code_enemy: U32,
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match code_enemy:
+    case 0:
+      cell_code_player(player_cell_code(player_x, player_y, x, y), shots, enemy_shots, rings, player_x, player_y, shield, invuln, x, y)
+    case _:
+      code_enemy
+
+def cell_code_player(
+  code_player: U32,
+  shots: List(PlayerShot),
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match code_player:
+    case 0:
+      cell_code_shot(shot_list_has(shots, x, y), enemy_shots, rings, player_x, player_y, shield, invuln, x, y)
+    case _:
+      code_player
+
+def cell_code_shot(
+  player_shot_here: U32,
+  enemy_shots: List(EnemyShot),
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match player_shot_here:
+    case 0:
+      cell_code_enemy_shot(enemy_shot_code(enemy_shots, x, y), rings, player_x, player_y, shield, invuln, x, y)
+    case _:
+      5
+
+def cell_code_enemy_shot(
+  code_enemy_shot: U32,
+  rings: List(Ring),
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match code_enemy_shot:
+    case 0:
+      cell_code_ring(ring_list_has(rings, x, y), player_x, player_y, shield, invuln, x, y)
+    case _:
+      code_enemy_shot
+
+def cell_code_ring(
+  ring_here: U32,
+  player_x: U32,
+  player_y: U32,
+  shield: U32,
+  invuln: U32,
+  x: U32,
+  y: U32
+) -> U32:
+  match ring_here:
+    case 0:
+      cell_code_shield(player_hitbox_has(player_x, player_y, x, y) & (0 < shield) & (invuln === 0))
+    case _:
+      2
+
+def cell_code_shield(shield_here: U32) -> U32:
+  match shield_here:
+    case 0:
+      0
+    case _:
+      1
 
 def cell_cls(game_: Game, x: U32, y: U32) -> String:
   cell_code_cls(cell_code(game_, x, y), bg_cell_cls(x, y, tick_no_of(game_)))
@@ -3989,7 +4662,10 @@ def board_cell(game_: Game, x: U32, y: U32) -> HTML(StarfoxEvent):
   <div class={cell_cls(game_, x, y)} />
 
 def row_cells(game_: Game, y: U32, x: U32) -> List(HTML(StarfoxEvent)):
-  match x === board_w:
+  row_cells_done(x === board_w, game_, y, x)
+
+def row_cells_done(done: U32, game_: Game, y: U32, x: U32) -> List(HTML(StarfoxEvent)):
+  match done:
     case 0:
       cons_html(board_cell(game_, x, y), row_cells(game_, y, x + 1))
     case _:
@@ -3999,7 +4675,10 @@ def board_row(game_: Game, y: U32) -> HTML(StarfoxEvent):
   <div class="row">{...row_cells(game_, y, 0)}</div>
 
 def board_rows(game_: Game, y: U32) -> List(HTML(StarfoxEvent)):
-  match y === board_h:
+  board_rows_done(y === board_h, game_, y)
+
+def board_rows_done(done: U32, game_: Game, y: U32) -> List(HTML(StarfoxEvent)):
+  match done:
     case 0:
       cons_html(board_row(game_, y), board_rows(game_, y + 1))
     case _:
@@ -4015,11 +4694,11 @@ def shell_attrs_live(mode: U32) -> List(Attr(StarfoxEvent)):
   [attr{"class", "layout shell " ++ shell_tone(mode)}, on_key_down{starfox_key_evt}, every_ms{move_tick_ms, evt_move_tick()}, every_ms{tick_ms, evt_tick()}]
 
 def shell_attrs(mode: U32) -> List(Attr(StarfoxEvent)):
-  match mode === 1:
-    case 0:
-      shell_attrs_idle(mode)
-    case _:
+  match mode:
+    case 1:
       shell_attrs_live(mode)
+    case _:
+      shell_attrs_idle(mode)
 
 def chip(label: String, value: String, tone: String) -> HTML(StarfoxEvent):
   <div class="hud-chip">
@@ -4183,19 +4862,29 @@ def overlay_if(game_: Game) -> HTML(StarfoxEvent):
       kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
       shots, enemy_shots, enemies, rings, gate, boss
     }:
-      match mode === 1:
-        case 0:
-          match mode === 2:
-            case 0:
-              match mode === 0:
-                case 0:
-                  overlay_run_over(reason, score, best, kills, bosses)
-                case _:
-                  overlay_brief()
-            case _:
-              overlay_upgrade(level, choice_a, choice_b, choice_c)
-        case _:
-          <div class="overlay_empty" />
+      overlay_if_mode(mode, reason, score, best, kills, bosses, level, choice_a, choice_b, choice_c)
+
+def overlay_if_mode(
+  mode: U32,
+  reason: U32,
+  score: U32,
+  best: U32,
+  kills: U32,
+  bosses: U32,
+  level: U32,
+  choice_a: U32,
+  choice_b: U32,
+  choice_c: U32
+) -> HTML(StarfoxEvent):
+  match mode:
+    case 0:
+      overlay_brief()
+    case 1:
+      <div class="overlay_empty" />
+    case 2:
+      overlay_upgrade(level, choice_a, choice_b, choice_c)
+    case _:
+      overlay_run_over(reason, score, best, kills, bosses)
 
 def reason_text(reason: U32) -> String:
   match reason:
