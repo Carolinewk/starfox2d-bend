@@ -412,7 +412,7 @@ def mode_is_over(mode: U32) -> U32:
   mode === 3
 
 def player_immortal() -> U32:
-  1
+  0
 
 # Game construction
 # -----------------
@@ -622,7 +622,7 @@ def key_is_down(key: U32) -> U32:
   (key === 40) | (key === 83)
 
 def key_is_fire(key: U32) -> U32:
-  key === 32
+  (key === 32) | (key === 13) | (key === 70)
 
 def key_is_restart(key: U32) -> U32:
   key === 82
@@ -3314,13 +3314,13 @@ def shell_tone(mode: U32) -> String:
 def lead_copy(mode: U32) -> String:
   match mode:
     case 0:
-      "Mission ready. Launch with movement, Space, or the on-screen action. This version stays inside the Bend App target, so the combat is grid-based but it keeps the original loop."
+      "Mission ready. Launch with movement, Space, F, Enter, or the on-screen action. This version stays inside the Bend App target, so the combat is grid-based but it keeps the original loop."
     case 1:
-      "Arrow keys or WASD move. Press Space or tap Fire to shoot. Pure Bend handles both UI and game state."
+      "Arrow keys or WASD move. Press Space, F, Enter, or tap Fire to shoot. Pure Bend handles both UI and game state."
     case 2:
       "Level-up pause. Pick one upgrade with 1, 2, 3 or tap a card."
     case _:
-      "The run is over. Press Space, any move button, use Relaunch, or hit Restart to return to standby."
+      "The run is over. Press Space, F, Enter, any move button, use Relaunch, or hit Restart to return to standby."
 
 def two_digits(value: U32) -> String:
   match value < 10:
@@ -4082,7 +4082,7 @@ def overlay_brief() -> HTML(StarfoxEvent):
   <div class="overlay">
     <div class="overlay_title">MISSION BRIEF</div>
     {overlay_sub("Destroy enemies for score and XP. Rings award bonus points. Closing gates crush the ship if you miss the gap. Every full XP bar opens a three-card upgrade pick. The boss lane opens every sixty seconds.")}
-    {overlay_sub("Move with arrows or WASD. Space launches the run and fires once you are in sector. Buttons still work on mobile.")}
+    {overlay_sub("Move with arrows or WASD. Space, F, or Enter launches the run and fires once you are in sector. Buttons still work on mobile.")}
     <div class="choices">
       {overlay_action_btn("Launch", "Start Run", "Kick off the sortie and enter Sector 01 immediately.", evt_fire())}
     </div>
@@ -4102,7 +4102,7 @@ def overlay_run_over(reason: U32, score: U32, best: U32, kills: U32, bosses: U32
       ++ " | Bosses "
       ++ show_u32(bosses)
     )}
-    {overlay_sub("Press Space, move, or use the buttons below.")}
+    {overlay_sub("Press Space, F, Enter, move, or use the buttons below.")}
     <div class="choices">
       {overlay_action_btn("Fire", "Relaunch", "Start a fresh run immediately.", evt_fire())}
       {overlay_action_btn("Reset", "Stand By", "Return to the mission briefing screen.", evt_restart())}
