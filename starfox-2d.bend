@@ -1022,7 +1022,7 @@ def mk_enemy(id: U32, x: U32, seed: U32) -> Enemy:
   span = 1 + (rng_mod(seed + (id * 3), 3));
   kind = rng_mod(seed + (id * 11), 2);
   dir = enemy_spawn_dir(seed, id);
-  enemy{id, x, 1, 5, fire, dir, span, 0, kind}
+  enemy{id, x, 1, 3, fire, dir, span, 0, kind}
 
 def spawn_enemy(game_: Game) -> Game:
   match game_:
@@ -1254,33 +1254,45 @@ def shot_hits_boss(shot_: PlayerShot, boss_: Boss) -> U32:
     case pshot{x, y, dir, damage}:
       boss_hitbox_has(boss_, x, y)
 
-def count_hits_enemy(enemy_: Enemy, shots: List(PlayerShot)) -> U32:
+def player_shot_damage(shot_: PlayerShot) -> U32:
+  match shot_:
+    case pshot{x, y, dir, damage}:
+      damage
+
+def count_damage_enemy(enemy_: Enemy, shots: List(PlayerShot)) -> U32:
   match shots:
     case []:
       0
     case shot_<>rest:
       match shot_hits_enemy(shot_, enemy_):
         case 0:
-          count_hits_enemy(enemy_, rest)
+          count_damage_enemy(enemy_, rest)
         case _:
-          1 + count_hits_enemy(enemy_, rest)
+          player_shot_damage(shot_) + count_damage_enemy(enemy_, rest)
 
-def count_hits_boss(boss_: Boss, shots: List(PlayerShot)) -> U32:
+def count_damage_boss(boss_: Boss, shots: List(PlayerShot)) -> U32:
   match shots:
     case []:
       0
     case shot_<>rest:
       match shot_hits_boss(shot_, boss_):
         case 0:
-          count_hits_boss(boss_, rest)
+          count_damage_boss(boss_, rest)
         case _:
-          1 + count_hits_boss(boss_, rest)
+          player_shot_damage(shot_) + count_damage_boss(boss_, rest)
+
+def boss_apply_hits(boss_: Boss, damage: U32) -> Boss:
+  match boss_:
+    case no_boss{}:
+      no_boss{}
+    case boss{x, y, hp, max_hp, fire, dir, drift}:
+      boss{x, y, u32_sub_sat(hp, damage), max_hp, fire, dir, drift}
 
 def enemy_dead_after(enemy_: Enemy, shots: List(PlayerShot)) -> U32:
-  enemy_hp(enemy_) <= count_hits_enemy(enemy_, shots)
+  enemy_hp(enemy_) <= count_damage_enemy(enemy_, shots)
 
 def enemy_any_hit(enemy_: Enemy, shots: List(PlayerShot)) -> U32:
-  0 < count_hits_enemy(enemy_, shots)
+  0 < count_damage_enemy(enemy_, shots)
 
 def shot_hits_any_enemy(shot_: PlayerShot, enemies: List(Enemy)) -> U32:
   match enemies:
@@ -1318,8 +1330,8 @@ def enemy_survivors(enemies: List(Enemy), shots: List(PlayerShot)) -> List(Enemy
 def enemy_keep(enemy_: Enemy, shots: List(PlayerShot), rest: List(Enemy)) -> List(Enemy):
   match enemy_:
     case enemy{id, x, y, hp, fire, dir, span, step, kind}:
-      hits = count_hits_enemy(enemy{id, x, y, hp, fire, dir, span, step, kind}, shots);
-      enemy{id, x, y, u32_sub_sat(hp, hits), fire, dir, span, step, kind}<>rest
+      damage = count_damage_enemy(enemy{id, x, y, hp, fire, dir, span, step, kind}, shots);
+      enemy{id, x, y, u32_sub_sat(hp, damage), fire, dir, span, step, kind}<>rest
 
 def consume_player_shots(shots: List(PlayerShot), enemies: List(Enemy), boss_: Boss, pierce: U32) -> List(PlayerShot):
   match shots:
@@ -1333,11 +1345,7 @@ def consume_player_shots(shots: List(PlayerShot), enemies: List(Enemy), boss_: B
           consume_player_shots(rest, enemies, boss_, pierce)
 
 def shot_consumed(shot_: PlayerShot, enemies: List(Enemy), boss_: Boss, pierce: U32) -> U32:
-  match pierce === 0:
-    case 0:
-      0
-    case _:
-      shot_hits_boss(shot_, boss_) | shot_hits_any_enemy(shot_, enemies)
+  shot_hits_boss(shot_, boss_) | shot_hits_any_enemy(shot_, enemies)
 
 def shot_hits_any(shot_: PlayerShot, enemies: List(Enemy), boss_: Boss) -> U32:
   shot_hits_boss(shot_, boss_) | shot_hits_any_enemy(shot_, enemies)
@@ -2418,7 +2426,7 @@ def tick_combat_phase(state: Game) -> Game:
     }:
       kill_count = enemy_kill_count(enemies, shots);
       enemies1 = enemy_survivors(enemies, shots);
-      boss_hits = count_hits_boss(boss, shots);
+      boss_hits = count_damage_boss(boss, shots);
       boss1 = boss_apply_hits(boss, boss_hits);
       shots1 = consume_player_shots(shots, enemies, boss, pierce);
       state1 = mk_game(
@@ -2442,13 +2450,6 @@ def boss_down_if(flag: U32, state: Game) -> Game:
       state
     case _:
       boss_down_state(state)
-
-def boss_apply_hits(boss_: Boss, hits: U32) -> Boss:
-  match boss_:
-    case no_boss{}:
-      no_boss{}
-    case boss{x, y, hp, max_hp, fire, dir, drift}:
-      boss{x, y, u32_sub_sat(hp, hits), max_hp, fire, dir, drift}
 
 def boss_dead_now(before: Boss, after: Boss) -> U32:
   match before:
