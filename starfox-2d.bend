@@ -301,35 +301,47 @@ def pos_y(p: Pos) -> U32:
       y
 
 def u32_dec(n: U32) -> U32:
-  match n === 0:
+  match n:
     case 0:
-      n - 1
-    case _:
       0
+    case _:
+      n - 1
 
 def u32_sub_sat(a: U32, b: U32) -> U32:
-  match a <= b:
+  u32_sub_sat_flag(a, b, a <= b)
+
+def u32_sub_sat_flag(a: U32, b: U32, a_le_b: U32) -> U32:
+  match a_le_b:
     case 0:
       a - b
     case _:
       0
 
 def u32_min(a: U32, b: U32) -> U32:
-  match a < b:
+  u32_min_flag(a, b, a < b)
+
+def u32_min_flag(a: U32, b: U32, a_lt_b: U32) -> U32:
+  match a_lt_b:
     case 0:
       b
     case _:
       a
 
 def u32_max(a: U32, b: U32) -> U32:
-  match a < b:
+  u32_max_flag(a, b, a < b)
+
+def u32_max_flag(a: U32, b: U32, a_lt_b: U32) -> U32:
+  match a_lt_b:
     case 0:
       a
     case _:
       b
 
 def abs_diff(a: U32, b: U32) -> U32:
-  match a < b:
+  abs_diff_flag(a, b, a < b)
+
+def abs_diff_flag(a: U32, b: U32, a_lt_b: U32) -> U32:
+  match a_lt_b:
     case 0:
       a - b
     case _:
@@ -361,11 +373,11 @@ def rng_next(seed: U32) -> U32:
   (seed * 1664525) + 1013904223
 
 def rng_mod(seed: U32, bound: U32) -> U32:
-  match bound === 0:
+  match bound:
     case 0:
-      rng_next(seed) % bound
-    case _:
       0
+    case _:
+      rng_next(seed) % bound
 
 def dir_dx(dir: DirX, x: U32) -> U32:
   match dir:
@@ -865,18 +877,32 @@ def gate_hits_player(gate_: Gate, px: U32, py: U32) -> U32:
     case no_gate{}:
       0
     case gate{gx, gy, gap, min_gap, close, hit}:
-      player_left = px + 1;
-      player_right = px + 3;
+      player_left = px;
+      player_right = px + (player_w - 1);
       gate_top = gy;
       gate_bottom = gy + 1;
       gap_left = gx;
       gap_right = gx + gap - 1;
-      overlap_y = (py <= gate_bottom) & (gate_top <= (py + 2));
+      overlap_y = (py <= gate_bottom) & (gate_top <= (py + (player_h - 1)));
       match overlap_y:
         case 0:
           0
         case _:
           (player_left < gap_left) | (gap_right < player_right)
+
+def gate_block_player_x(gate_: Gate, old_x: U32, player_y: U32, next_x: U32) -> U32:
+  match gate_hits_player(gate_, next_x, player_y):
+    case 0:
+      next_x
+    case _:
+      old_x
+
+def gate_block_player_y(gate_: Gate, player_x: U32, old_y: U32, next_y: U32) -> U32:
+  match gate_hits_player(gate_, player_x, next_y):
+    case 0:
+      next_y
+    case _:
+      old_y
 
 def player_has_cell(player_x: U32, player_y: U32, x: U32, y: U32) -> U32:
   row = u32_sub_sat(y, player_y);
@@ -2611,7 +2637,7 @@ def gate_hit_if(flag: U32, state: Game) -> Game:
     case 0:
       state
     case _:
-      take_hit(with_gate_hit(state), 2, 120, toast_gate_crush())
+      destroy_player(with_gate_hit(state), toast_gate_crush())
 
 def enemy_collision_if(flag: U32, state: Game) -> Game:
   match flag:
@@ -2944,18 +2970,34 @@ def apply_movement(evt: StarfoxEvent, state: Game) -> Game:
       kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
       shots, enemy_shots, enemies, rings, gate, boss
     }:
-      x1 = movement_x(evt, player_x, player_speed);
-      y1 = movement_y(evt, player_y, player_speed);
-      mk_game(
+      got = (game{
         mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
         pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
-        x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
         move_h, move_v, move_h_ttl, move_v_ttl,
         fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
         enemy_timer, ring_timer, gate_timer, boss_timer,
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
-      )
+      } :: Game);
+      match gate_hits_player(gate, player_x, player_y):
+        case 0:
+          x_try = movement_x(evt, player_x, player_speed);
+          x1 = gate_block_player_x(gate, player_x, player_y, x_try);
+          y_try = movement_y(evt, player_y, player_speed);
+          y1 = gate_block_player_y(gate, x1, player_y, y_try);
+          mk_game(
+            mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+            pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+            x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+            move_h, move_v, move_h_ttl, move_v_ttl,
+            fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+            enemy_timer, ring_timer, gate_timer, boss_timer,
+            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+            shots, enemy_shots, enemies, rings, gate, boss
+          )
+        case _:
+          destroy_player(with_gate_hit(got), toast_gate_crush())
 
 def remember_move_h(evt: StarfoxEvent, move_h: U32) -> U32:
   match evt:
@@ -3068,18 +3110,34 @@ def apply_held_movement(state: Game) -> Game:
       kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
       shots, enemy_shots, enemies, rings, gate, boss
     }:
-      x1 = held_move_x(move_h, move_h_ttl, player_x, player_speed);
-      y1 = held_move_y(move_v, move_v_ttl, player_y, player_speed);
-      mk_game(
+      got = (game{
         mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
         pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
-        x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+        player_x, player_y, player_hp, player_max_hp, player_damage, player_speed,
         move_h, move_v, move_h_ttl, move_v_ttl,
         fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
         enemy_timer, ring_timer, gate_timer, boss_timer,
         kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
         shots, enemy_shots, enemies, rings, gate, boss
-      )
+      } :: Game);
+      match gate_hits_player(gate, player_x, player_y):
+        case 0:
+          x_try = held_move_x(move_h, move_h_ttl, player_x, player_speed);
+          x1 = gate_block_player_x(gate, player_x, player_y, x_try);
+          y_try = held_move_y(move_v, move_v_ttl, player_y, player_speed);
+          y1 = gate_block_player_y(gate, x1, player_y, y_try);
+          mk_game(
+            mode, reason, seed, tick_no, next_id, score, best, sector, level, xp, xp_next,
+            pending_upgrades, choice_a, choice_b, choice_c, toast_kind, toast_value, toast_ttl,
+            x1, y1, player_hp, player_max_hp, player_damage, player_speed,
+            move_h, move_v, move_h_ttl, move_v_ttl,
+            fire_cd, fire_rate, bullet_step, spread, pierce, shield, invuln,
+            enemy_timer, ring_timer, gate_timer, boss_timer,
+            kills, bosses, hull_up, damage_up, thruster_up, loader_up, wing_up, pierce_up, shield_up, rail_up, repair_up,
+            shots, enemy_shots, enemies, rings, gate, boss
+          )
+        case _:
+          destroy_player(with_gate_hit(got), toast_gate_crush())
 
 def decay_move(state: Game) -> Game:
   match state:
